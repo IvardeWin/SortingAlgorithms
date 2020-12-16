@@ -1,16 +1,24 @@
 const WIDTH = screen.width * 0.7;
 const HEIGHT = screen.height * 0.6;
-const BAR_AMOUNT = 500;
-const BAR_WIDTH = Math.floor(WIDTH / BAR_AMOUNT) - 1;
-const BAR_SPACE = 1;
 
-var iteratorBubbleSort = 0;
-var cycleNumberBubbleSort = 1;
+var barAmount = 100;
+var barWidth = Math.floor(WIDTH / barAmount) - 1;
+var barSpace = 1;
 var minHeight = 1;
 
 var intsToSortArray = [];
-
 var delay = 0;
+
+
+//var slider = document.getElementById("barWidth");
+//console.log(typeof(slider));
+
+/*
+slider.oninput = function() {
+  barWidth = this.value;
+  barAmount = Math.floor(WIDTH/(barAmount + 1));
+}
+*/
 
 function randomNumber(maxHeight, minHeight){
   return Math.floor(Math.random()*(maxHeight - minHeight))+minHeight;
@@ -18,10 +26,10 @@ function randomNumber(maxHeight, minHeight){
 
 function createRandomIntArray(){
   var i;
-  for(i = 0; i < BAR_AMOUNT; i++){
+  for(i = 0; i < barAmount; i++){
     var randomHeight = randomNumber(HEIGHT, minHeight);
-    var position = i * (BAR_WIDTH + BAR_SPACE);
-    intsToSortArray.push(new component(BAR_WIDTH, randomHeight, "blue", position, HEIGHT));
+    var position = i * (barWidth + barSpace);
+    intsToSortArray.push(new component(barWidth, randomHeight, "blue", position, HEIGHT));
   }
 }
 
@@ -79,28 +87,36 @@ function component(width, height, color, x, y){
 function updateCanvas(){
   var k;
   canvasCreate.clear();
-  for(k = 0; k < BAR_AMOUNT; k++){
+  for(k = 0; k < barAmount; k++){
     intsToSortArray[k].update();
   }
 }
 
-function bubbleSort(){
 
-  if ((iteratorBubbleSort - (BAR_AMOUNT - cycleNumberBubbleSort)*3) >= 0){
+var iterator = 0;
+var cycleNumberBubbleSort = 1;
+
+function resetSorts(){
+  cycleNumberBubbleSort = 1;
+  iterator = 0;
+}
+
+function bubbleSort(){
+  if ((iterator - (barAmount - cycleNumberBubbleSort)*3) >= 0){
     cycleNumberBubbleSort++;
 
-    iteratorBubbleSort = 0;
+    iterator = 0;
 
-    if (cycleNumberBubbleSort >= BAR_AMOUNT){
+    if (cycleNumberBubbleSort >= barAmount){
       intervalToggleBubbleSort.stop();
       return;
     }
   } 
 
-  var barCompare1 = Math.floor(iteratorBubbleSort/3);
+  var barCompare1 = Math.floor(iterator/3);
   var barCompare2 = barCompare1 + 1;
 
-  switch(iteratorBubbleSort - (barCompare1 * 3)){
+  switch(iterator - (barCompare1 * 3)){
     case 0:
 
       intsToSortArray[barCompare1].changeColor("red");
@@ -125,7 +141,40 @@ function bubbleSort(){
 
   }
 
-  iteratorBubbleSort++;
+  iterator++;
   updateCanvas();
 
+}
+
+var switched;
+
+function insertionSort(){
+  var currentBarInsertionSort = Math.floor(iterator/3);
+  
+  switch(iterator - (currentBarInsertionSort * 3)){
+    case 0:
+      intsToSortArray[currentBarInsertionSort].changeColor("red");
+    	intsToSortArray[currentBarInsertionSort].changeColor("red");
+      break;
+
+    case 1:
+      
+      var heightFirst = intsToSortArray[barCompare1].getHeight();
+      var heightSecond = intsToSortArray[barCompare2].getHeight();
+      if (heightFirst > heightSecond){
+        intsToSortArray[currentBarInsertionSort].changeHeight(heightSecond);
+        intsToSortArray[currentBarInsertionSort + 1].changeHeight(heightFirst)
+      }
+      break;
+    
+    case 2:
+      if (switched){
+        intsToSortArray[barCompare1 + 2].changeColor("blue");
+        intsToSortArray[barCompare2 + 2] .changeColor("blue");
+      } else{
+        intsToSortArray[barCompare1].changeColor("blue");
+        intsToSortArray[barCompare2].changeColor("blue");
+      }
+    }
+  iterator++;
 }
