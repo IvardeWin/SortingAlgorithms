@@ -85,8 +85,16 @@ var intervalToggleInsertionSort = {
 function stopIntervals(){
   intervalToggleInsertionSort.stop();
   intervalToggleBubbleSort.stop();
+  resetAfterSuddenIntervalStop();
   // Reset the variables for when an interval, or Sorting algorithm, is restarted 
   resetVariables();
+}
+
+function resetAfterSuddenIntervalStop(){
+  for(i = 0; i < barAmount; i++){
+    intsToSortArray[i].changeColor("blue");
+  }
+  updateCanvas();
 }
 
 // Reset the variables for when an interval, or Sorting algorithm, is restarted 
