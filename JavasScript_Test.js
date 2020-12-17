@@ -1,7 +1,7 @@
 const WIDTH = screen.width * 0.7;
 const HEIGHT = screen.height * 0.6;
 
-var barAmount = 100;
+var barAmount = 50;
 var barWidth = Math.floor(WIDTH / barAmount) - 1;
 var barSpace = 1;
 var minHeight = 1;
@@ -42,6 +42,16 @@ function setUp() {
 var intervalToggleBubbleSort = {
   start : function() {
     this.interval = setInterval(bubbleSort, delay);
+  },
+  stop : function(){
+    clearInterval(this.interval);
+  }
+
+}
+
+var intervalToggleInsertionSort = {
+  start : function() {
+    this.interval = setInterval(insertionSort, delay);
   },
   stop : function(){
     clearInterval(this.interval);
@@ -102,6 +112,7 @@ function resetSorts(){
 }
 
 function bubbleSort(){
+  
   if ((iterator - (barAmount - cycleNumberBubbleSort)*3) >= 0){
     cycleNumberBubbleSort++;
 
@@ -113,29 +124,28 @@ function bubbleSort(){
     }
   } 
 
-  var barCompare1 = Math.floor(iterator/3);
-  var barCompare2 = barCompare1 + 1;
+  var currentBarBubbleSort = Math.floor(iterator/3);
 
-  switch(iterator - (barCompare1 * 3)){
+  switch(iterator - (currentBarBubbleSort * 3)){
     case 0:
 
-      intsToSortArray[barCompare1].changeColor("red");
-    	intsToSortArray[barCompare2].changeColor("red");
+      intsToSortArray[currentBarBubbleSort].changeColor("red");
+    	intsToSortArray[currentBarBubbleSort + 1].changeColor("red");
       break;
 
     case 1:
-      var heightFirst = intsToSortArray[barCompare1].getHeight();
-      var heightSecond = intsToSortArray[barCompare2].getHeight();
+      var heightFirst = intsToSortArray[currentBarBubbleSort].getHeight();
+      var heightSecond = intsToSortArray[currentBarBubbleSort + 1].getHeight();
       if (heightFirst > heightSecond){
-        intsToSortArray[barCompare1].changeHeight(heightSecond);
-        intsToSortArray[barCompare2].changeHeight(heightFirst)
+        intsToSortArray[currentBarBubbleSort].changeHeight(heightSecond);
+        intsToSortArray[currentBarBubbleSort + 1].changeHeight(heightFirst)
       }
 
       break;
     
     case 2:
-      intsToSortArray[barCompare1].changeColor("blue");
-    	intsToSortArray[barCompare2].changeColor("blue");
+      intsToSortArray[currentBarBubbleSort].changeColor("blue");
+    	intsToSortArray[currentBarBubbleSort + 1].changeColor("blue");
 
       break;
 
@@ -147,34 +157,66 @@ function bubbleSort(){
 }
 
 var switched;
-
+var locationStartMainArray = 0;
 function insertionSort(){
+  // Stop the algorithm when the end of the array is reached.
+  if (iterator >= (barAmount - 1) * 3){
+    intervalToggleBubbleSort.stop();
+    return;
+  }
+
+  // Get the current bar in int, hence Math.floor
   var currentBarInsertionSort = Math.floor(iterator/3);
-  
+  // Keeps track of where the SubArray ends
+  locationStartMainArray = Math.max(locationStartMainArray, currentBarInsertionSort + 1);
+
+  // This is equal to iterator%3, but is less taxing on perfomance.
   switch(iterator - (currentBarInsertionSort * 3)){
     case 0:
+      // Change the colors of the elements that will be compared to red.
       intsToSortArray[currentBarInsertionSort].changeColor("red");
-    	intsToSortArray[currentBarInsertionSort].changeColor("red");
+    	intsToSortArray[currentBarInsertionSort + 1].changeColor("red");
       break;
 
     case 1:
       
-      var heightFirst = intsToSortArray[barCompare1].getHeight();
-      var heightSecond = intsToSortArray[barCompare2].getHeight();
+      var heightFirst = intsToSortArray[currentBarInsertionSort].getHeight();
+      var heightSecond = intsToSortArray[currentBarInsertionSort + 1].getHeight();
+      // Switch the heigths if the elements are not in the correct order.
       if (heightFirst > heightSecond){
         intsToSortArray[currentBarInsertionSort].changeHeight(heightSecond);
-        intsToSortArray[currentBarInsertionSort + 1].changeHeight(heightFirst)
+        intsToSortArray[currentBarInsertionSort + 1].changeHeight(heightFirst);
+        
+        // Making sure that when the start of the SubArray is reached, the algorithm stops.
+        if (currentBarInsertionSort != 0 ){
+          // 1 gets added at the end of each iteration, hence, -2 + 1 = -1, 1 back.
+          // The iterator increases 3 times as fast for the animation, so -2 * 3
+          iterator -= (2 * 3);
+          switched = true;
+        } else {
+          switched = false;
+        }
+      // When switched is equal to false, either the end of the end of the subarray is reached,
+      // or an element has reached the correct position in the subArray,
+      // or last elements of the subarray and the first element of the main array are in the correct position.
+      } else {
+        switched = false;
       }
       break;
     
     case 2:
       if (switched){
-        intsToSortArray[barCompare1 + 2].changeColor("blue");
-        intsToSortArray[barCompare2 + 2] .changeColor("blue");
-      } else{
-        intsToSortArray[barCompare1].changeColor("blue");
-        intsToSortArray[barCompare2].changeColor("blue");
+        // Make sure the switched bars get turned to blue again
+        intsToSortArray[currentBarInsertionSort + 2].changeColor("blue");
+        intsToSortArray[currentBarInsertionSort + 2 + 1] .changeColor("blue");
+      } else {
+        intsToSortArray[currentBarInsertionSort].changeColor("blue");
+        intsToSortArray[currentBarInsertionSort + 1].changeColor("blue");
+        // Send the iterator to the start of the main array.
+        // -1 for the addtion to iterator at the end of the function.
+        iterator = locationStartMainArray * 3 - 1 ;
       }
     }
   iterator++;
+  updateCanvas();
 }
