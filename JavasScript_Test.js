@@ -1,13 +1,24 @@
 const WIDTH = screen.width * 0.7;
 const HEIGHT = screen.height * 0.6;
 
-var barAmount = 50;
+var barAmount = 20;
 var barWidth = Math.floor(WIDTH / barAmount) - 1;
 var barSpace = 1;
 var minHeight = 1;
 
 var intsToSortArray = [];
-var delay = 0;
+var delay = 100;
+
+// Common variables used by multiple Sorting Algorithms
+var iterator = 0;
+
+// Variables BubbleSort
+var cycleNumberBubbleSort = 1;
+var alreadySorted = false;
+
+// Variables InsertionSort
+var switched;
+var locationStartMainArray = 0;
 
 
 //var slider = document.getElementById("barWidth");
@@ -39,26 +50,58 @@ function setUp() {
   updateCanvas();
 }
 
+
+// Toggle to call the BubbleSort function after every delay ms
 var intervalToggleBubbleSort = {
   start : function() {
+    // Stop all other functions
+    stopIntervals()
+    // Start the interval
     this.interval = setInterval(bubbleSort, delay);
   },
   stop : function(){
+    // Stop the interval
     clearInterval(this.interval);
   }
 
 }
 
+// Toggle to call the InsertionSort function after every delay ms
 var intervalToggleInsertionSort = {
   start : function() {
+    // Stop all other functions
+    stopIntervals();
+    // Start the interval
     this.interval = setInterval(insertionSort, delay);
   },
   stop : function(){
+    // Stop the interval
     clearInterval(this.interval);
   }
 
 }
 
+// Stops every interval of every Sorting Algorithm
+function stopIntervals(){
+  intervalToggleInsertionSort.stop();
+  intervalToggleBubbleSort.stop();
+  // Reset the variables for when an interval, or Sorting algorithm, is restarted 
+  resetVariables();
+}
+
+// Reset the variables for when an interval, or Sorting algorithm, is restarted 
+function resetVariables(){
+  // Common Variables
+  iterator = 0;
+  // BubbleSort variables
+  cycleNumberBubbleSort = 1;
+  alreadySorted = false;
+  // InsertionSort variables
+  switched = false;
+  locationStartMainArray = 0;
+}
+
+// Creates a canvas where the Sorting Agorithms can be displayed
 var canvasCreate = {
   canvas : document.createElement("canvas"),
   start : function() {
@@ -67,11 +110,26 @@ var canvasCreate = {
       this.context = this.canvas.getContext("2d");
       document.body.insertBefore(this.canvas, document.body.childNodes[0]);
       },
+  // Cleans up the canvas so a new visualisation can be displayed
   clear : function() {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }
 
+
+// Redraws the current state of the Sorting algoritms
+function updateCanvas(){
+  var k;
+  canvasCreate.clear();
+  for(k = 0; k < barAmount; k++){
+    intsToSortArray[k].update();
+  }
+}
+
+
+// Creates an object for every value in the array.
+// Height is equal to the value of the array.
+// All other variables are present for the visualisation of the Sorting Algorithms.
 function component(width, height, color, x, y){
   this.width = width;
   this.height = height;
@@ -88,61 +146,59 @@ function component(width, height, color, x, y){
   this.getHeight = function(){
     return this.height;
   };
+  // Redraw the current values of the object.
   this.update = function() {
     this.ctx.fillStyle = this.color;
     this.ctx.fillRect(this.x, this.y, this.width, -this.height);
   }
 }
 
-function updateCanvas(){
-  var k;
-  canvasCreate.clear();
-  for(k = 0; k < barAmount; k++){
-    intsToSortArray[k].update();
-  }
-}
-
-
-var iterator = 0;
-var cycleNumberBubbleSort = 1;
-
-function resetSorts(){
-  cycleNumberBubbleSort = 1;
-  iterator = 0;
-}
-
+// The bubbleSort algoritm
 function bubbleSort(){
-  
+  // After every cycle, 1 more value at the end of the array will certainly
+  // be sorted, so this value does not have to be compared again. 
+  // This keeps track of the number of cycles and makes sure the already sorted 
+  // values will not be compared again.
   if ((iterator - (barAmount - cycleNumberBubbleSort)*3) >= 0){
     cycleNumberBubbleSort++;
 
     iterator = 0;
-
-    if (cycleNumberBubbleSort >= barAmount){
+    // Stops the algorithm if either everything is sorted, or if the number of 
+    // elements that are certainly sorted is equal or greater than the amount
+    // of elements in the array
+    if (cycleNumberBubbleSort >= barAmount || alreadySorted){
       intervalToggleBubbleSort.stop();
       return;
     }
+    // If alreadySorted turns false before the start of the next cycle, then not every 
+    // element in the array is sorted.
+    alreadySorted = true;
   } 
 
   var currentBarBubbleSort = Math.floor(iterator/3);
 
+  // There are 3 cases to create an animation. 
+  //   1 case to turn the bars that will be compared red
+  //   1 case to compare and maybe switch the bars that are being compared
+  //   1 case to turn the bars blue again.
   switch(iterator - (currentBarBubbleSort * 3)){
+    // Turn the bars that will be compared red.
     case 0:
-
       intsToSortArray[currentBarBubbleSort].changeColor("red");
     	intsToSortArray[currentBarBubbleSort + 1].changeColor("red");
       break;
-
+    // Compare and maybe switch the bars.
     case 1:
       var heightFirst = intsToSortArray[currentBarBubbleSort].getHeight();
       var heightSecond = intsToSortArray[currentBarBubbleSort + 1].getHeight();
       if (heightFirst > heightSecond){
         intsToSortArray[currentBarBubbleSort].changeHeight(heightSecond);
         intsToSortArray[currentBarBubbleSort + 1].changeHeight(heightFirst)
+        alreadySorted = false;
       }
 
       break;
-    
+    // Turn the bars blue again
     case 2:
       intsToSortArray[currentBarBubbleSort].changeColor("blue");
     	intsToSortArray[currentBarBubbleSort + 1].changeColor("blue");
@@ -156,8 +212,7 @@ function bubbleSort(){
 
 }
 
-var switched;
-var locationStartMainArray = 0;
+// The InsertionSort Algorithms.
 function insertionSort(){
   // Stop the algorithm when the end of the array is reached.
   if (iterator >= (barAmount - 1) * 3){
@@ -171,6 +226,10 @@ function insertionSort(){
   locationStartMainArray = Math.max(locationStartMainArray, currentBarInsertionSort + 1);
 
   // This is equal to iterator%3, but is less taxing on perfomance.
+  // There are 3 cases to create an animation. 
+  //   1 case to turn the bars that will be compared red
+  //   1 case to compare and maybe switch the bars that are being compared
+  //   1 case to turn the bars blue again.
   switch(iterator - (currentBarInsertionSort * 3)){
     case 0:
       // Change the colors of the elements that will be compared to red.
@@ -219,4 +278,52 @@ function insertionSort(){
     }
   iterator++;
   updateCanvas();
+}
+
+
+function bubbleSort(){
+  
+  if ((iterator - (barAmount - cycleNumberBubbleSort)*3) >= 0){
+    cycleNumberBubbleSort++;
+
+    iterator = 0;
+
+    if (cycleNumberBubbleSort >= barAmount || alreadySorted){
+      intervalToggleBubbleSort.stop();
+      return;
+    }
+    alreadySorted = true;
+  } 
+
+  var currentBarBubbleSort = Math.floor(iterator/3);
+
+  switch(iterator - (currentBarBubbleSort * 3)){
+    case 0:
+
+      intsToSortArray[currentBarBubbleSort].changeColor("red");
+    	intsToSortArray[currentBarBubbleSort + 1].changeColor("red");
+      break;
+
+    case 1:
+      var heightFirst = intsToSortArray[currentBarBubbleSort].getHeight();
+      var heightSecond = intsToSortArray[currentBarBubbleSort + 1].getHeight();
+      if (heightFirst > heightSecond){
+        intsToSortArray[currentBarBubbleSort].changeHeight(heightSecond);
+        intsToSortArray[currentBarBubbleSort + 1].changeHeight(heightFirst)
+        alreadySorted = false;
+      }
+
+      break;
+    
+    case 2:
+      intsToSortArray[currentBarBubbleSort].changeColor("blue");
+    	intsToSortArray[currentBarBubbleSort + 1].changeColor("blue");
+
+      break;
+
+  }
+
+  iterator++;
+  updateCanvas();
+
 }
