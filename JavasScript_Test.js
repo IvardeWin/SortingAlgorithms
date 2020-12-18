@@ -1,13 +1,13 @@
 const WIDTH = screen.width * 0.7;
 const HEIGHT = screen.height * 0.6;
 
-var barAmount = 20;
+var barAmount = 100;
 var barWidth = Math.floor(WIDTH / barAmount) - 1;
 var barSpace = 1;
 var minHeight = 1;
 
 var intsToSortArray = [];
-var delay = 100;
+var delay = 0;
 
 // Common variables used by multiple Sorting Algorithms
 var iterator = 0;
@@ -20,6 +20,9 @@ var alreadySorted = false;
 var switched;
 var locationStartMainArray = 0;
 
+// Varialbes SelectionSort
+var currentHeighestValueInArray = 0;
+var cycleNumberSelectionSort = 0;
 
 //var slider = document.getElementById("barWidth");
 //console.log(typeof(slider));
@@ -31,9 +34,11 @@ slider.oninput = function() {
 }
 */
 
+
 function randomNumber(maxHeight, minHeight){
   return Math.floor(Math.random()*(maxHeight - minHeight))+minHeight;
 }
+
 
 function createRandomIntArray(){
   var i;
@@ -43,6 +48,7 @@ function createRandomIntArray(){
     intsToSortArray.push(new component(barWidth, randomHeight, "blue", position, HEIGHT));
   }
 }
+
 
 function setUp() {
   canvasCreate.start();
@@ -66,6 +72,7 @@ var intervalToggleBubbleSort = {
 
 }
 
+
 // Toggle to call the InsertionSort function after every delay ms
 var intervalToggleInsertionSort = {
   start : function() {
@@ -81,6 +88,25 @@ var intervalToggleInsertionSort = {
 
 }
 
+
+// Toggle to call the InsertionSort function after every delay ms
+var intervalToggleSelectionSort = {
+  start : function() {
+    // Stop all other functions
+    stopIntervals();
+    // The iterator needs to start at 3 for the first cycle of selectionSort
+    iterator = 3;
+    // Start the interval
+    this.interval = setInterval(selectionSort, delay);
+  },
+  stop : function(){
+    // Stop the interval
+    clearInterval(this.interval);
+  }
+
+}
+
+
 // Stops every interval of every Sorting Algorithm
 function stopIntervals(){
   intervalToggleInsertionSort.stop();
@@ -90,6 +116,7 @@ function stopIntervals(){
   resetVariables();
 }
 
+
 function resetAfterSuddenIntervalStop(){
   for(i = 0; i < barAmount; i++){
     intsToSortArray[i].changeColor("blue");
@@ -97,17 +124,22 @@ function resetAfterSuddenIntervalStop(){
   updateCanvas();
 }
 
+
 // Reset the variables for when an interval, or Sorting algorithm, is restarted 
 function resetVariables(){
   // Common Variables
   iterator = 0;
   // BubbleSort variables
   cycleNumberBubbleSort = 1;
-  alreadySorted = false;
+  alreadySorted = true;
   // InsertionSort variables
   switched = false;
   locationStartMainArray = 0;
+  // SelectionSort variables
+  currentHeighestValueInArray = 0;
+  cycleNumberSelectionSort = 0;
 }
+
 
 // Creates a canvas where the Sorting Agorithms can be displayed
 var canvasCreate = {
@@ -161,6 +193,97 @@ function component(width, height, color, x, y){
   }
 }
 
+
+function selectionSort(){
+  if ((iterator - (barAmount - cycleNumberSelectionSort)*3) >= 0){
+    cycleNumberSelectionSort++;
+
+    if (cycleNumberSelectionSort >= barAmount){
+      intervalToggleSelectionSort.stop();
+      return;
+    }
+
+    // Prevent switching with itself
+    if ((barAmount - cycleNumberSelectionSort) != currentHeighestValueInArray ){
+      iterator = 0;
+    } else {
+      iterator = 2;
+    }
+  }
+
+  var currentBarSelectionSort = Math.floor(iterator/3);
+  var switchCaseValue;
+  // Special cases for the swich var to create end of cycle animation
+  if (iterator >= 3){
+    switchCaseValue = iterator - (currentBarSelectionSort * 3);
+  } else if ( iterator == 0 ){
+    switchCaseValue = 1003;
+  } else if ( iterator == 1 ) {
+    switchCaseValue = 1002;
+  } else if ( iterator == 2 ) {
+    switchCaseValue = 1001;
+  }
+
+  switch(switchCaseValue){
+    case 0:
+
+      intsToSortArray[currentBarSelectionSort].changeColor("red");
+      intsToSortArray[currentHeighestValueInArray].changeColor("red");
+
+      break;
+    // Empty case to create a smoother animation
+    case 1:
+      /*
+      var heightCurrent = intsToSortArray[currentBarSelectionSort].getHeight();
+      var heightHeigestValue = intsToSortArray[currentHeighestValueInArray].getHeight();
+      if (heightCurrent > heightHeigestValue){
+        intsToSortArray[currentHeighestValueInArray].changeColor("blue");
+        currentHeighestValueInArray = currentBarSelectionSort;
+      } else {
+        intsToSortArray[currentBarSelectionSort].changeColor("blue");
+      }
+      */
+      break;
+
+    case 2:
+      var heightCurrent = intsToSortArray[currentBarSelectionSort].getHeight();
+      var heightHeigestValue = intsToSortArray[currentHeighestValueInArray].getHeight();
+      if (heightCurrent > heightHeigestValue){
+        intsToSortArray[currentHeighestValueInArray].changeColor("blue");
+        currentHeighestValueInArray = currentBarSelectionSort;
+      } else {
+        intsToSortArray[currentBarSelectionSort].changeColor("blue");
+      }
+      break;
+    
+    // These 3 cases animate the end of every cycle when the heighest value has been found
+    case 1003:
+      intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("red");
+      intsToSortArray[currentHeighestValueInArray].changeColor("red");
+
+      break;
+
+    case 1002:
+      
+      var heightCurrent = intsToSortArray[barAmount - cycleNumberSelectionSort].getHeight();
+      var heightHeigestValue = intsToSortArray[currentHeighestValueInArray].getHeight();
+      intsToSortArray[barAmount - cycleNumberSelectionSort].changeHeight(heightHeigestValue);
+      intsToSortArray[currentHeighestValueInArray].changeHeight(heightCurrent);
+      
+      break;
+
+    case 1001:
+      intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("blue");
+      intsToSortArray[currentHeighestValueInArray].changeColor("blue");
+      currentHeighestValueInArray = 0;
+
+  }
+
+  iterator++;
+  updateCanvas();
+}
+
+
 // The bubbleSort algoritm
 function bubbleSort(){
   // After every cycle, 1 more value at the end of the array will certainly
@@ -201,7 +324,7 @@ function bubbleSort(){
       var heightSecond = intsToSortArray[currentBarBubbleSort + 1].getHeight();
       if (heightFirst > heightSecond){
         intsToSortArray[currentBarBubbleSort].changeHeight(heightSecond);
-        intsToSortArray[currentBarBubbleSort + 1].changeHeight(heightFirst)
+        intsToSortArray[currentBarBubbleSort + 1].changeHeight(heightFirst);
         alreadySorted = false;
       }
 
@@ -217,7 +340,6 @@ function bubbleSort(){
 
   iterator++;
   updateCanvas();
-
 }
 
 // The InsertionSort Algorithms.
@@ -286,52 +408,4 @@ function insertionSort(){
     }
   iterator++;
   updateCanvas();
-}
-
-
-function bubbleSort(){
-  
-  if ((iterator - (barAmount - cycleNumberBubbleSort)*3) >= 0){
-    cycleNumberBubbleSort++;
-
-    iterator = 0;
-
-    if (cycleNumberBubbleSort >= barAmount || alreadySorted){
-      intervalToggleBubbleSort.stop();
-      return;
-    }
-    alreadySorted = true;
-  } 
-
-  var currentBarBubbleSort = Math.floor(iterator/3);
-
-  switch(iterator - (currentBarBubbleSort * 3)){
-    case 0:
-
-      intsToSortArray[currentBarBubbleSort].changeColor("red");
-    	intsToSortArray[currentBarBubbleSort + 1].changeColor("red");
-      break;
-
-    case 1:
-      var heightFirst = intsToSortArray[currentBarBubbleSort].getHeight();
-      var heightSecond = intsToSortArray[currentBarBubbleSort + 1].getHeight();
-      if (heightFirst > heightSecond){
-        intsToSortArray[currentBarBubbleSort].changeHeight(heightSecond);
-        intsToSortArray[currentBarBubbleSort + 1].changeHeight(heightFirst)
-        alreadySorted = false;
-      }
-
-      break;
-    
-    case 2:
-      intsToSortArray[currentBarBubbleSort].changeColor("blue");
-    	intsToSortArray[currentBarBubbleSort + 1].changeColor("blue");
-
-      break;
-
-  }
-
-  iterator++;
-  updateCanvas();
-
 }
