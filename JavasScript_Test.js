@@ -1,10 +1,10 @@
 const WIDTH = screen.width * 0.7;
 const HEIGHT = screen.height * 0.6;
 
-var barAmount = 100;
+var barAmount = 500;
 var barWidth = Math.floor(WIDTH / barAmount) - 1;
 var barSpace = 1;
-var minHeight = 1;
+var minHeight = 10;
 
 var intsToSortArray = [];
 var delay = 0;
@@ -20,9 +20,12 @@ var alreadySorted = false;
 var switched;
 var locationStartMainArray = 0;
 
-// Varialbes SelectionSort
+// Variables SelectionSort
 var currentHeighestValueInArray = 0;
 var cycleNumberSelectionSort = 0;
+
+// Variables MergeSort
+
 
 //var slider = document.getElementById("barWidth");
 //console.log(typeof(slider));
@@ -106,11 +109,31 @@ var intervalToggleSelectionSort = {
 
 }
 
+// Toggle to call the MergeSort function after every delay ms
+var intervalToggleMergeSort = {
+  start : function() {
+    // Stop all other functions
+    stopIntervals();
+
+    mergeSortDevisionArray = [intsToSortArray];
+
+    // Start the interval
+    this.interval = setInterval(mergeSort, delay);
+  },
+  stop : function(){
+    // Stop the interval
+    clearInterval(this.interval);
+  }
+
+}
+
 
 // Stops every interval of every Sorting Algorithm
 function stopIntervals(){
   intervalToggleInsertionSort.stop();
   intervalToggleBubbleSort.stop();
+  intervalToggleSelectionSort.stop();
+  intervalToggleMergeSort.stop();
   resetAfterSuddenIntervalStop();
   // Reset the variables for when an interval, or Sorting algorithm, is restarted 
   resetVariables();
@@ -186,6 +209,9 @@ function component(width, height, color, x, y){
   this.getHeight = function(){
     return this.height;
   };
+  this.getColor = function(){
+    return this.color;
+  }
   // Redraw the current values of the object.
   this.update = function() {
     this.ctx.fillStyle = this.color;
@@ -193,11 +219,315 @@ function component(width, height, color, x, y){
   }
 }
 
+// Generates a Random Color
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+
+/*
+function generateRandomColorArray(){
+  for( var i = 0; i < barAmount; i++){
+    mergeSortColorList.push(getRandomColor());
+  }
+}
+*/
+
+var mergeSortSortedArray = [false]
+var coloringDevideDoneArray = [true]
+var mergeSortColorArray = ["blue"]
+var mergeSortDevisionArray = []
+var mergeSortStepArray = []
+
+function mergeSort(){
+
+
+  if (mergeSortStepArray.length > 0){
+    mergeSortStepArray = mergeArraysColoring(mergeSortStepArray)
+    if (mergeSortStepArray.length == 1){
+      mergeSortStepArray = mergeArraysColoring(mergeSortStepArray)
+      mergeSortDevisionArray.splice(iterator, 2, mergeSortStepArray)
+      mergeSortStepArray = []
+    }
+    updateCanvas()
+    return
+  }
+
+  if (coloringDevideDoneArray.includes(false)){
+    var coloringDoneArrayLength = coloringDevideDoneArray.length
+    for( var i = 0; i < coloringDoneArrayLength; i++){
+      coloringDevideDoneArray[i] = colorArrayDivision(mergeSortDevisionArray[i], mergeSortColorArray[i])
+    }
+    updateCanvas()
+    return
+  }
+
+  if (mergeSortDevisionArray.length == 1 && mergeSortSortedArray[0] == true){
+    intervalToggleMergeSort.stop()
+    return;
+  }
+
+  // Split array if length of array in question is not 1 and if the array has not been sorted yet.
+  if (mergeSortDevisionArray[iterator].length != 1 && !mergeSortSortedArray[iterator]){
+    var newArrays= divideArray(mergeSortDevisionArray[iterator])
+    mergeSortDevisionArray.splice(iterator, 1, newArrays[0], newArrays[1])
+    coloringDevideDoneArray.splice(iterator, 1, false, false);
+    
+    if (newArrays[0].length != 1 && newArrays[1].length != 1){
+      mergeSortSortedArray.splice(iterator, 1, false, false);
+    } else if (newArrays[0].length == 1){
+      mergeSortSortedArray.splice(iterator, 1, true, true);
+    } else if (newArrays[1].length == 1){
+      mergeSortSortedArray.splice(iterator, 1, false, true)
+    } else {
+      console.log("error")
+    }
+
+    mergeSortColorArray.splice(iterator, 0, getRandomColor());
+    return;
+
+  // If array can't be split, see if it can be combined with the array to the left of it
+  } else if ( iterator != 0){
+    var leftArray = mergeSortDevisionArray[iterator - 1];
+    var array = mergeSortDevisionArray[iterator];
+    var rightArray = mergeSortDevisionArray[iterator + 1]
+    var rightArrayLength;
+
+    if (rightArray === undefined){
+      rightArrayLength = -2;
+    } else {
+      rightArrayLength = rightArray.length;
+    }
+    
+    if((leftArray.length == array.length || array.length + 1) && array.length != rightArrayLength 
+    && array.length != (rightArrayLength + 1)){
+      
+      coloringDevideDoneArray.splice(iterator, 2, false);
+      mergeSortColorArray.splice(iterator, 1);
+      iterator--;
+      mergeSortStepArray = mergeArraysSteps(leftArray, array, mergeSortColorArray[iterator]);
+      mergeSortSortedArray.splice(iterator, 2, true)
+      return;
+    } 
+
+    iterator++;
+  } else {
+    iterator++;
+  }
+
+}
+
+function mergeArraysColoring(stepArray){
+  var currentStep = stepArray[0]
+  switch(currentStep[0]){
+    case 0:
+      currentStep[1].changeColor("red")
+      currentStep[2].changeColor("red")
+    break;
+
+    case 1:
+      if (currentStep[1] == true){
+        for (var i = 0; i < currentStep[2].length; i++){
+          currentStep[2][i].changeHeight(currentStep[3][i])
+        }
+        currentStep[4][0].changeColor(currentStep[5])
+        currentStep[4][1].changeColor("red")
+      }
+    break;
+
+    case 2:
+      currentStep[1].changeColor(currentStep[3])
+      currentStep[2].changeColor(currentStep[3])
+    break;
+
+    case 3:
+      for(var i = 0; i < currentStep[1].length; i++){
+        currentStep[1][i].changeColor(currentStep[2])
+      }
+      return currentStep[1]
+
+  }
+  stepArray.shift()
+  return stepArray
+}
+
+
+function mergeArraysSteps(left, right, color){
+  var stepArray = []
+  var leftLength = left.length;
+  var loopCycles = leftLength + right.length
+  var leftLocation = 0;
+  var rightLocation = 0;
+
+  var mergedArray = []
+  var leftHeights = [];
+  var rightHeights = [];
+
+  for (var i = 0; i < left.length; i++){
+    mergedArray.push(left[i])
+    leftHeights.push(left[i].getHeight());
+  }
+
+  for (var i = 0; i < right.length; i++){
+    mergedArray.push(right[i])
+    rightHeights.push(right[i].getHeight());
+  }
+
+
+  for (var i = 0; i < loopCycles; i++){
+    var leftComponent = left[leftLocation]
+    var rightComponent  = right[rightLocation]
+
+    if (leftComponent === undefined && (leftLocation - left.length) < rightLocation){
+      leftComponent = right[leftLocation - left.length]
+    }
+   
+    if (leftComponent === undefined){
+      break;
+
+    } else if (rightComponent === undefined || rightHeights[0] === undefined){
+      break;
+
+    } else if (leftHeights[leftLocation + rightLocation] > rightHeights[0]){
+      var firstStep = [0]
+      var secondStep = [1]
+      var secondStepObjectArray = []
+      var secondStepHeightArray = []
+      var secondStepChangeCollorArray = []
+      var thirdStep = [2]
+
+      if ( left[leftLocation+rightLocation] !== undefined){
+        firstStep.push(left[leftLocation + rightLocation]);
+      } else if (right[(leftLocation + rightLocation) - leftLength] !== undefined){
+        firstStep.push(right[(leftLocation + rightLocation) - leftLength])
+      } else {
+        firstStep.push(right[0])
+      }
+      
+      firstStep.push(rightComponent);
+      
+      leftHeights.splice(leftLocation + rightLocation, 0, rightHeights[0])
+      rightHeights.splice(0, 1)
+      
+
+      if (leftLength > 1){
+
+        for(var k = leftLocation; k < leftHeights.length; k++){
+          
+          if (left[k] !== undefined){
+
+            secondStepObjectArray.push(left[k])
+            secondStepHeightArray.push(leftHeights[k])
+
+          } else if (leftHeights[k] !== undefined){
+
+            secondStepObjectArray.push(right[k - leftLength])
+            secondStepHeightArray.push(leftHeights[k])
+
+          } else {
+            secondStepObjectArray.push(right[k - leftLength])
+            secondStepHeightArray.push(rightHeights[k - leftHeights.length])
+
+          }
+        }
+        
+
+      } else {
+        secondStepObjectArray.push(left[0]);
+        secondStepHeightArray.push(leftHeights[0])
+        secondStepObjectArray.push(right[0]);
+        secondStepHeightArray.push(leftHeights[1])
+        secondStepChangeCollorArray.push(right[0])
+
+      }
+
+      secondStepChangeCollorArray.push(rightComponent)
+      
+      if (left[leftLocation] != undefined){
+        secondStepChangeCollorArray.push(left[leftLocation])
+      } else {
+        secondStepChangeCollorArray.push(right[leftLocation - leftLength])
+      }
+      secondStep.push(true)
+      secondStep.push(secondStepObjectArray)
+      secondStep.push(secondStepHeightArray)
+      secondStep.push(secondStepChangeCollorArray)
+      secondStep.push(color)
+
+      thirdStep.push(leftComponent)
+      thirdStep.push(rightComponent)
+      
+      thirdStep.push(color)
+      
+      stepArray.push(firstStep, secondStep, thirdStep)
+      rightLocation++;
+    } else {
+      var firstStep = [0]
+      var secondStep = [1]
+      var thirdStep = [2]
+      
+      if ( left[leftLocation+rightLocation] !== undefined){
+        firstStep.push(left[leftLocation + rightLocation]);
+      } else if (right[leftLength - (leftLocation + rightLocation)] !== undefined){
+        firstStep.push(right[leftLength - (leftLocation + rightLocation)])
+      } else {
+        firstStep.push(right[0])
+      }
+
+      firstStep.push(rightComponent);
+
+      secondStep.push(false);
+
+      thirdStep.push(leftComponent)
+      thirdStep.push(rightComponent)
+      thirdStep.push(color)
+
+      stepArray.push(firstStep, secondStep, thirdStep)
+      leftLocation++;
+    }
+  }
+
+  stepArray.push([3, mergedArray, color])
+
+  return stepArray;
+}
+
+
+function divideArray(arrayToSplit){
+  lengthLeft = Math.ceil(arrayToSplit.length/2);
+  leftArray = arrayToSplit.slice(0, lengthLeft);
+  rightArray = arrayToSplit.slice(lengthLeft, arrayToSplit.length);
+
+  return [leftArray, rightArray];
+}
+
+
+function colorArrayDivision(array, color){
+  if (array === undefined){
+    return true;
+  }
+
+  arrayLength = array.length;
+  for(var i = 0; i < array.length; i++){
+    if (array[i].getColor() != color){
+      array[i].changeColor(color);
+      return false;
+    }
+  }
+  return true;
+}
+
 
 function selectionSort(){
   if ((iterator - (barAmount - cycleNumberSelectionSort)*3) >= 0){
     cycleNumberSelectionSort++;
 
+    // Stop when the sort is done
     if (cycleNumberSelectionSort >= barAmount){
       intervalToggleSelectionSort.stop();
       return;
@@ -210,10 +540,9 @@ function selectionSort(){
       iterator = 2;
     }
   }
-
   var currentBarSelectionSort = Math.floor(iterator/3);
   var switchCaseValue;
-  // Special cases for the swich var to create end of cycle animation
+  // Special cases for the switch statement to create end of cycle animation
   if (iterator >= 3){
     switchCaseValue = iterator - (currentBarSelectionSort * 3);
   } else if ( iterator == 0 ){
@@ -233,22 +562,13 @@ function selectionSort(){
       break;
     // Empty case to create a smoother animation
     case 1:
-      /*
-      var heightCurrent = intsToSortArray[currentBarSelectionSort].getHeight();
-      var heightHeigestValue = intsToSortArray[currentHeighestValueInArray].getHeight();
-      if (heightCurrent > heightHeigestValue){
-        intsToSortArray[currentHeighestValueInArray].changeColor("blue");
-        currentHeighestValueInArray = currentBarSelectionSort;
-      } else {
-        intsToSortArray[currentBarSelectionSort].changeColor("blue");
-      }
-      */
+
       break;
 
     case 2:
       var heightCurrent = intsToSortArray[currentBarSelectionSort].getHeight();
       var heightHeigestValue = intsToSortArray[currentHeighestValueInArray].getHeight();
-      if (heightCurrent > heightHeigestValue){
+      if (heightCurrent >= heightHeigestValue){
         intsToSortArray[currentHeighestValueInArray].changeColor("blue");
         currentHeighestValueInArray = currentBarSelectionSort;
       } else {
