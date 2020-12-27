@@ -8,7 +8,7 @@ var barAmount = Math.floor(WIDTH/(barWidth + barSpace));
 var minHeight = 10;
 
 var intsToSortArray = [];
-var delay = -10000;
+var delay = 25;
 
 // Common variables used by multiple Sorting Algorithms
 // Common variables are used to communicate information between
@@ -60,7 +60,12 @@ function setUp() {
 }
 
 function changeDelay(value){
-  newDelay = Math.pow(value, 1.7);
+  if ( value < 1){
+    newDelay = -1;
+  } else {
+    newDelay = Math.pow(value, 4);
+  }
+  
   
   intervalToggleBubbleSort.stop()
   intervalToggleInsertionSort.stop()
