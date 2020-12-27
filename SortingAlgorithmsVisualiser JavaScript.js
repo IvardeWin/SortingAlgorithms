@@ -1,9 +1,10 @@
 const WIDTH = screen.width * 0.7;
 const HEIGHT = screen.height * 0.6;
 
-var barAmount = 50;
-var barWidth = Math.floor(WIDTH / barAmount) - 1;
+
+var barWidth = 25;
 var barSpace = 1;
+var barAmount = Math.floor(WIDTH/(barWidth + barSpace));
 var minHeight = 10;
 
 var intsToSortArray = [];
@@ -13,6 +14,7 @@ var delay = -10000;
 // Common variables are used to communicate information between
 // calls of a function of a certain algorithm
 var iterator = 0;
+var runningSortingAlgorithm;
 
 // Variables BubbleSort
 var cycleNumberBubbleSort = 1;
@@ -57,10 +59,31 @@ function setUp() {
   updateCanvas();
 }
 
+function changeDelay(value){
+  newDelay = Math.pow(value, 1.7);
+  
+  intervalToggleBubbleSort.stop()
+  intervalToggleInsertionSort.stop()
+  intervalToggleSelectionSort.stop()
+  intervalToggleMergeSort.stop()
+
+  delay = newDelay;
+
+  if ( runningSortingAlgorithm == 0 ) {
+    intervalToggleBubbleSort.continue()
+  } else if( runningSortingAlgorithm == 1 ) {
+    intervalToggleInsertionSort.continue()
+  } else if ( runningSortingAlgorithm == 2 ) {
+    intervalToggleSelectionSort.continue()
+  } else if ( runningSortingAlgorithm == 3 ) {
+    intervalToggleMergeSort.continue()
+  }
+}
 
 function changeAmountOfBars(value){
+  value = Math.pow(value, 2);
   if (value <= barWidth){
-    barWidth = Math.floor(value);
+    barWidth = value;
     var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
     var extraBars = newBarAmount - barAmount;
     var updateWidth = intsToSortArray.length
@@ -78,10 +101,9 @@ function changeAmountOfBars(value){
       intsToSortArray.push(new component(barWidth, randomHeight, "blue", position, HEIGHT))
     }
     barAmount = newBarAmount;
-    updateCanvas();
 
   } else if (value > barWidth){
-    barWidth = Math.floor(value);
+    barWidth = value;
     var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
     var redundantBars = barAmount - newBarAmount;
     for(var i = 0; i < redundantBars; i++){
@@ -107,7 +129,11 @@ var intervalToggleBubbleSort = {
   start : function() {
     // Stop all other functions
     stopIntervals()
+    runningSortingAlgorithm = 0;
     // Start the interval
+    this.interval = setInterval(bubbleSort, delay);
+  },
+  continue : function() {
     this.interval = setInterval(bubbleSort, delay);
   },
   stop : function(){
@@ -122,8 +148,12 @@ var intervalToggleBubbleSort = {
 var intervalToggleInsertionSort = {
   start : function() {
     // Stop all other functions
-    stopIntervals();
+    stopIntervals()
+    runningSortingAlgorithm = 1
     // Start the interval
+    this.interval = setInterval(insertionSort, delay);
+  },
+  continue : function() {
     this.interval = setInterval(insertionSort, delay);
   },
   stop : function(){
@@ -141,7 +171,12 @@ var intervalToggleSelectionSort = {
     stopIntervals();
     // The iterator needs to start at 3 for the first cycle of selectionSort
     iterator = 3;
+
+    runningSortingAlgorithm = 2;
     // Start the interval
+    this.interval = setInterval(selectionSort, delay);
+  },
+  continue : function() {
     this.interval = setInterval(selectionSort, delay);
   },
   stop : function(){
@@ -159,7 +194,11 @@ var intervalToggleMergeSort = {
 
     mergeSortDevisionArray = [intsToSortArray];
 
+    runningSortingAlgorithm = 3;
     // Start the interval
+    this.interval = setInterval(mergeSort, delay);
+  },
+  continue : function() {
     this.interval = setInterval(mergeSort, delay);
   },
   stop : function(){
@@ -177,6 +216,7 @@ function stopIntervals(){
   intervalToggleSelectionSort.stop();
   intervalToggleMergeSort.stop();
   resetAfterSuddenIntervalStop();
+  runningSortingAlgorithm = undefined;
   // Reset the variables for when an interval, or Sorting algorithm, is restarted 
   resetVariables();
 }
