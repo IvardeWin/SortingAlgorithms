@@ -7,7 +7,7 @@ var barSpace = 1;
 var minHeight = 10;
 
 var intsToSortArray = [];
-var delay = 50;
+var delay = -10000;
 
 // Common variables used by multiple Sorting Algorithms
 // Common variables are used to communicate information between
@@ -35,16 +35,6 @@ var mergeSortStepArray = []
 
 
 
-//var slider = document.getElementById("barWidth");
-//console.log(typeof(slider));
-
-/*
-slider.oninput = function() {
-  barWidth = this.value;
-  barAmount = Math.floor(WIDTH/(barAmount + 1));
-}
-*/
-
 // Return a random number between an min and max number.
 function randomNumber(maxHeight, minHeight){
   return Math.floor(Math.random()*(maxHeight - minHeight))+minHeight;
@@ -67,6 +57,50 @@ function setUp() {
   updateCanvas();
 }
 
+
+function changeAmountOfBars(value){
+  if (value <= barWidth){
+    barWidth = Math.floor(value);
+    var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
+    var extraBars = newBarAmount - barAmount;
+    var updateWidth = intsToSortArray.length
+    for (var i = 0; i < updateWidth; i++){
+      intsToSortArray[i].changeWidth(barWidth)
+
+      var position = i * (barWidth + barSpace);
+      intsToSortArray[i].changePosition(position);
+
+    }
+    
+    for(var i = 0; i < extraBars; i++){
+      var randomHeight = randomNumber(HEIGHT, minHeight);
+      var position = (i + barAmount) * (barWidth + barSpace);
+      intsToSortArray.push(new component(barWidth, randomHeight, "blue", position, HEIGHT))
+    }
+    barAmount = newBarAmount;
+    updateCanvas();
+
+  } else if (value > barWidth){
+    barWidth = Math.floor(value);
+    var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
+    var redundantBars = barAmount - newBarAmount;
+    for(var i = 0; i < redundantBars; i++){
+      intsToSortArray.pop();
+    }
+
+    var arrayLength = intsToSortArray.length;
+
+    for(var i = 0; i < arrayLength; i++ ){
+      intsToSortArray[i].changeWidth(barWidth)
+      
+      var position = i * (barWidth + barSpace);
+      intsToSortArray[i].changePosition(position);
+    }
+
+    barAmount = newBarAmount;
+  }
+  updateCanvas()
+}
 
 // Toggle to call the BubbleSort function after every delay ms
 var intervalToggleBubbleSort = {
@@ -219,18 +253,24 @@ function component(width, height, color, x, y){
   };
   this.changeColor = function(color){
     this.color = color;
-  }
+  };
+  this.changeWidth = function(width){
+    this.width = width;
+  };
+  this.changePosition = function(position){
+    this.x = position;
+  };
   this.getHeight = function(){
     return this.height;
   };
   this.getColor = function(){
     return this.color;
-  }
+  };
   // Redraw the current values of the object.
   this.update = function() {
     this.ctx.fillStyle = this.color;
     this.ctx.fillRect(this.x, this.y, this.width, -this.height);
-  }
+  };
 }
 
 
@@ -315,8 +355,8 @@ function mergeSort(){
     // Error handeling with the array to the right
     if (rightArray === undefined){
       rightArrayLength = -2;
-    // Edge case handeling where all 3 arrays are length 1
-    } else if (rightArray.length == 1 && array.length == 1 && leftArray.length == 1){
+    // Edge case handeling where all 3 arrays are the same length
+    } else if (rightArray.length == array.length && array.length == leftArray.length ){
       rightArrayLength = -2;
     } else {
       rightArrayLength = rightArray.length;
@@ -638,7 +678,12 @@ function divideArray(arrayToSplit){
 function getRandomColor() {
   var letters = '0123456789ABCDEF';
   var color = '#';
-  for (var i = 0; i < 6; i++) {
+  // The first 2 letters corrospong to red. Red colors are unfavourable, hence, red should not get
+  // high values.
+  for (var i = 0; i < 2; i++) {
+    color += letters[Math.floor(Math.random() * 10)];
+  }
+  for (var i = 0; i < 4; i++) {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
@@ -648,7 +693,6 @@ function getRandomColor() {
 // false indicates that it is very likely that not all bars have been turned to color
 // true indicates that every bar has color
 function colorArrayDivision(array, color){
-
   arrayLength = array.length;
   for(var i = 0; i < arrayLength; i++){
     if (array[i].getColor() != color){

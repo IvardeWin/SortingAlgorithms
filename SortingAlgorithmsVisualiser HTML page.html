@@ -1,22 +1,24 @@
 <!DOCTYPE html> 
 <html> 
 <head> 
+    <link href="Slider_Package\nouislider.css" rel="stylesheet">
+    <script src="Slider_Package\nouislider.js"></script>
+    <script type="text/javascript" src="JavasScript_Test.js"></script>
     <link rel="stylesheet" href="styleTest.css">
-	<title>Hello World</title> 
-	<script type="text/javascript" src="JavasScript_Test.js"></script> 
+	<title>Hello World</title>  
 </head> 
 <body onload="setUp()"> 
+    
+
     <p>Sorting Algorithm</p>
     <canvas id="canvas" style="border:0px solid #d3d3d3;">
         Your browser does not support the HTML5 canvas tag.</canvas>
     <button onclick="intervalToggleBubbleSort.start()">BubbleSort</button>
-    <button onclick="intervalToggleInsertionSort.start()">InsertSort</button>
+    <button onclick="intervalToggleInsertionSort.start()">InsertionSort</button>
     <button onclick="intervalToggleSelectionSort.start()">SelectionSort</button>
     <button onclick="intervalToggleMergeSort.start()">MergeSort</button>
     <div>
-        <input type="range" id="myRange" min="1" max="100" value="50">
-        <p>Value: <span id="demo"></span></p>
+        <input type="range" min="1" max="50" value="10" id="blabla" oninput="changeAmountOfBars(this.value)" step="0.1">
     </div>
-
 </body>
 </html>
