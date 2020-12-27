@@ -7,9 +7,11 @@ var barSpace = 1;
 var minHeight = 10;
 
 var intsToSortArray = [];
-var delay = 100;
+var delay = 50;
 
 // Common variables used by multiple Sorting Algorithms
+// Common variables are used to communicate information between
+// calls of a function of a certain algorithm
 var iterator = 0;
 
 // Variables BubbleSort
@@ -25,6 +27,12 @@ var currentHeighestValueInArray = 0;
 var cycleNumberSelectionSort = 0;
 
 // Variables MergeSort
+var mergeSortSortedArray = [false]
+var coloringDevideDoneArray = [true]
+var mergeSortColorArray = ["blue"]
+var mergeSortDevisionArray = []
+var mergeSortStepArray = []
+
 
 
 //var slider = document.getElementById("barWidth");
@@ -37,12 +45,12 @@ slider.oninput = function() {
 }
 */
 
-
+// Return a random number between an min and max number.
 function randomNumber(maxHeight, minHeight){
   return Math.floor(Math.random()*(maxHeight - minHeight))+minHeight;
 }
 
-
+// Creates an array with random integers between an min and a max.
 function createRandomIntArray(){
   var i;
   for(i = 0; i < barAmount; i++){
@@ -52,7 +60,7 @@ function createRandomIntArray(){
   }
 }
 
-
+// Fucntion called to set up canvas, and to create a random array to display
 function setUp() {
   canvasCreate.start();
   createRandomIntArray();
@@ -161,6 +169,12 @@ function resetVariables(){
   // SelectionSort variables
   currentHeighestValueInArray = 0;
   cycleNumberSelectionSort = 0;
+  // MergeSort variables
+  mergeSortSortedArray = [false]
+  coloringDevideDoneArray = [true]
+  mergeSortColorArray = ["blue"]
+  mergeSortDevisionArray = []
+  mergeSortStepArray = []
 }
 
 
@@ -219,135 +233,157 @@ function component(width, height, color, x, y){
   }
 }
 
-// Generates a Random Color
-function getRandomColor() {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
 
-
-/*
-function generateRandomColorArray(){
-  for( var i = 0; i < barAmount; i++){
-    mergeSortColorList.push(getRandomColor());
-  }
-}
-*/
-
-var mergeSortSortedArray = [false]
-var coloringDevideDoneArray = [true]
-var mergeSortColorArray = ["blue"]
-var mergeSortDevisionArray = []
-var mergeSortStepArray = []
-
+// MergeSort. The mergeSort algorithm recursively devides the array that it needs to sort into 2, and merges the 2 arrays back into 1 array,
+// where it sorts the elements during the merging.
+// Unfortunatly, calling mergesort recursively would not have worked with the visualisation present in this project.
+// Therefore, this is an iterative variant of mergeSort.
 function mergeSort(){
-
-
+  // If Arrays have been merged, execute the animation steps
   if (mergeSortStepArray.length > 0){
+    // Execute animation step
     mergeSortStepArray = mergeArraysColoring(mergeSortStepArray)
     if (mergeSortStepArray.length == 1){
+      // Last step is making sure everything is the right color
       mergeSortStepArray = mergeArraysColoring(mergeSortStepArray)
+      // Update the Devision array, the array used for the devisions and merging
       mergeSortDevisionArray.splice(iterator, 2, mergeSortStepArray)
+      // Empty the animation steps array
       mergeSortStepArray = []
     }
+    // update the canvas with the new heights and colors
     updateCanvas()
+    // Do not do anything else than the coloring
     return
   }
 
+  // When arrays are devided, give each array a different color from each other
   if (coloringDevideDoneArray.includes(false)){
+    // Amount of times for the loop to run
     var coloringDoneArrayLength = coloringDevideDoneArray.length
     for( var i = 0; i < coloringDoneArrayLength; i++){
+      // This makes sure every time only 1 bar is colored, and coloringDoneArrayLength contains
+      // false so that the coloring will continue the next time mergeSort is called
       coloringDevideDoneArray[i] = colorArrayDivision(mergeSortDevisionArray[i], mergeSortColorArray[i])
     }
+    // update the canvas with the new colors
     updateCanvas()
+    // Do not do anything else than the coloring
     return
   }
 
+  // When everything has the right colors and heights, check if the MergeSort algorithm is done
   if (mergeSortDevisionArray.length == 1 && mergeSortSortedArray[0] == true){
     intervalToggleMergeSort.stop()
     return;
   }
 
-  // Split array if length of array in question is not 1 and if the array has not been sorted yet.
+  // Split the array if the array can be devided into parts, and if the array is not sorted.
   if (mergeSortDevisionArray[iterator].length != 1 && !mergeSortSortedArray[iterator]){
-    var newArrays= divideArray(mergeSortDevisionArray[iterator])
+    // Split the array and get the new left and right array
+    var newArrays = divideArray(mergeSortDevisionArray[iterator])
+    // Add the new arrays to the list
     mergeSortDevisionArray.splice(iterator, 1, newArrays[0], newArrays[1])
+    
+    // Update coloringDevideDoneArray such that in the next mergesort iteration the new array will be colored in
     coloringDevideDoneArray.splice(iterator, 1, false, false);
     
+    // If array has length 1, then the array is sorted. Else the array is not sorted.
     if (newArrays[0].length != 1 && newArrays[1].length != 1){
       mergeSortSortedArray.splice(iterator, 1, false, false);
     } else if (newArrays[0].length == 1){
       mergeSortSortedArray.splice(iterator, 1, true, true);
-    } else if (newArrays[1].length == 1){
-      mergeSortSortedArray.splice(iterator, 1, false, true)
     } else {
-      console.log("error")
+      mergeSortSortedArray.splice(iterator, 1, false, true)
     }
 
+    // Get a new Color for the coloring of the arrays
     mergeSortColorArray.splice(iterator, 0, getRandomColor());
     return;
 
+
   // If array can't be split, see if it can be combined with the array to the left of it
+  // If iterator == 0, then no array exist on the left.
   } else if ( iterator != 0){
+    // get array to the left and right of array in question, and the array itself
     var leftArray = mergeSortDevisionArray[iterator - 1];
     var array = mergeSortDevisionArray[iterator];
     var rightArray = mergeSortDevisionArray[iterator + 1]
+    // There might not be an array to the right, hence, rightArray.length sometimes gives an error
     var rightArrayLength;
 
+    // Error handeling with the array to the right
     if (rightArray === undefined){
       rightArrayLength = -2;
+    // Edge case handeling where all 3 arrays are length 1
     } else if (rightArray.length == 1 && array.length == 1 && leftArray.length == 1){
       rightArrayLength = -2;
     } else {
       rightArrayLength = rightArray.length;
     }
     
+    // If array in question is about the same length as the array to the left of it, and it is not about 
+    // the same length as the array to the right of it, then the array will merge with the array to
+    // the left of it.
     if((leftArray.length == array.length || array.length + 1) && array.length != rightArrayLength 
     && array.length != (rightArrayLength + 1)){
-      
-      coloringDevideDoneArray.splice(iterator, 2, false);
+      // Remove one of the colors of the arrays. 
       mergeSortColorArray.splice(iterator, 1);
+      // Decrement iterator. Every operation will now be relative to the left array.
       iterator--;
+      // Get the Array of steps needed for the visualisation of the mergeSort algorithm
       mergeSortStepArray = mergeArraysSteps(leftArray, array, mergeSortColorArray[iterator]);
+      // Edit length of coloringDevideDoneArray such that it is the same length as MergeSortDevisionArray
+      coloringDevideDoneArray.splice(iterator, 1);
+      // The merged array is sorted, and 2 arrays have have been removed from MergeSortDevisionArray
       mergeSortSortedArray.splice(iterator, 2, true)
       return;
     } 
 
-    iterator++;
-  } else {
-    iterator++;
   }
+  // If the arrays could not be devided or merged, then consider the next array the next time MergeSort is called
+  iterator++;
 
 }
 
+
+// MergeArraysColoring executes 1 given step of the visualisation of the merging
+// of 2 arrays in MergeSort.
 function mergeArraysColoring(stepArray){
   var currentStep = stepArray[0]
+  // The first number in the array indicates what kind of step will be taken
   switch(currentStep[0]){
+    // Color the bars that will be compared/moved red.
     case 0:
       currentStep[1].changeColor("red")
       currentStep[2].changeColor("red")
     break;
 
+    // If bars need to be moved, change the height of every bar so every bar has the right height.
+    // and change the colors of 2 bars, since the 1 of the red bar has been moved according to the 
+    // visualisation
     case 1:
+      // If bars need to be moved/collored
       if (currentStep[1] == true){
         for (var i = 0; i < currentStep[2].length; i++){
           currentStep[2][i].changeHeight(currentStep[3][i])
         }
+        // color 2 bars differently so it will look like the red bars has been moved.
         currentStep[4][0].changeColor(currentStep[5])
         currentStep[4][1].changeColor("red")
       }
     break;
 
+    // Return 1 or multiple bars to the ending colors
     case 2:
       for(var i = 0; i < currentStep[1].length; i++){
         currentStep[1][i].changeColor(currentStep[2])
       }
     break;
+
     // Don't forget to make a function of the changing of colors. Code has been copied 3 times, Ivar
+    // Ending case. All visualisation steps are done. Return every bar to the final color, and 
+    // return the final mergedArray
     case 3:
       for(var i = 0; i < currentStep[1].length; i++){
         currentStep[1][i].changeColor(currentStep[2])
@@ -355,22 +391,44 @@ function mergeArraysColoring(stepArray){
       return currentStep[1]
 
   }
+
+  // Shift StepArray such that the first entry will be removed, and return the resulting steparray
   stepArray.shift()
   return stepArray
+
 }
 
+/*
+mergeArraysSteps function creates an array whith every step the visualisation
+needs to make to create an functioning visualisation
+This is by far the most important and hardest part of the MergeSort algorithm.
 
+@pre Left and right must be sorted, and left >= right
+left and right are final in this function.
+
+Every step is exist of an identifier, step[0], to indicate what kind of step it is.
+Then an series of arrays and colors, which are decoded by mergeArraysColoring.
+*/
 function mergeArraysSteps(left, right, color){
+  // StepArray will contain every step
   var stepArray = []
   var leftLength = left.length;
+  // loopCycles will be the maximum amount of times the forloop will run for
   var loopCycles = leftLength + right.length
+  // Keep track of where in the loop we are at
   var leftLocation = 0;
   var rightLocation = 0;
 
+  // Merged array will contain the sorted elements of left and right where 
+  // mergedArray[i].getHeight() <= mergedArray[i+1].getHeight
   var mergedArray = []
-  var leftHeights = [];
-  var rightHeights = [];
+  
+  // Arrays of integers which contain the heights of the object in left and right.
+  // These arrays are not final
+  var leftHeights = []
+  var rightHeights = []
 
+  // Get the heights, and thus the intergers for the intergers arrays
   for (var i = 0; i < left.length; i++){
     mergedArray.push(left[i])
     leftHeights.push(left[i].getHeight());
@@ -381,11 +439,13 @@ function mergeArraysSteps(left, right, color){
     rightHeights.push(right[i].getHeight());
   }
 
-
+  // Start making the steps
   for (var i = 0; i < loopCycles; i++){
+    // Get some basic information about this iteration of the loop
     var leftComponent = left[leftLocation]
     var rightComponent  = right[rightLocation]
 
+    // heck if the basic information means that the array needs to be stopped.
     if (leftComponent === undefined && (leftLocation - left.length) < rightLocation){
       leftComponent = right[leftLocation - left.length]
     }
@@ -396,6 +456,7 @@ function mergeArraysSteps(left, right, color){
     } else if (rightComponent === undefined || rightHeights[0] === undefined){
       break;
 
+    // If components need to switched arround, create a set of steps.
     } else if (leftHeights[leftLocation + rightLocation] > rightHeights[0]){
       var firstStep = [0]
       var secondStep = [1]
@@ -405,6 +466,10 @@ function mergeArraysSteps(left, right, color){
       var thirdStep = [2]
       var thirdStepChangeCollorArray = []
 
+      // Step 1. Turn 2 bars red. These bars will be compared and switched. These bars are located at
+      // some location of the leftHeights and the first position of the rightHeights array, which is equal
+      // to rightcomponent. Since leftHeights.length >= leftLength, the component can appear in right.
+      // The third case is for error handeling, and the last object of right will automatically selected.
       if ( left[ leftLocation + rightLocation ] !== undefined ) {
 
         firstStep.push( left[ leftLocation + rightLocation ] );
@@ -422,50 +487,55 @@ function mergeArraysSteps(left, right, color){
 
       }
 
+      // The right component to change color to red
       firstStep.push(rightComponent)
       thirdStepChangeCollorArray.push(rightComponent)
       
+      // Put the first element of rightHeights in an sorted position of leftHeights.
+      // This will sort the heights such that every object can get the right height.
       leftHeights.splice(leftLocation + rightLocation, 0, rightHeights[0])
       rightHeights.splice(0, 1)
       
-
+    
       if (leftLength > 1){
-
+        // run a loop, where every object will get it's corresponding height from either leftHeights
+        // or rightHeights. The loop runs from the left element being considered all the way to the right
+        // element being considered, since all these elements will change height.
+        
         for(var k = leftLocation; k < leftHeights.length; k++){
           
+          // Since leftHeight.length >= left, elements from right can get heights from leftHeights.
+          // This is handeled by this if-stament
           if (left[k] !== undefined){
 
             secondStepObjectArray.push(left[k])
             secondStepHeightArray.push(leftHeights[k])
-
-            thirdStepChangeCollorArray.push(left[k])
 
           } else if (leftHeights[k] !== undefined){
 
             secondStepObjectArray.push(right[k - leftLength])
             secondStepHeightArray.push(leftHeights[k])
 
-            thirdStepChangeCollorArray.push(right[k - leftLength])
-
           } else {
+
             secondStepObjectArray.push(right[k - leftLength])
             secondStepHeightArray.push(rightHeights[k - leftHeights.length])
 
-            thirdStepChangeCollorArray.push(right[k - leftLength])
-
           }
         }
-
+      // error handeling for when left.length == 1
       } else {
-
+        // the heights of only 2 elements need to be changed.
         secondStepObjectArray.push(left[0])
         secondStepHeightArray.push(leftHeights[0])
         secondStepObjectArray.push(right[0])
         secondStepHeightArray.push(leftHeights[1])
         secondStepChangeCollorArray.push(right[0])
-
       }
 
+      // SeconsecondStepChangeCollorArray will color rightComponent 'color' and the element left to 
+      // leftComponent red to create the illusion that the element moved. The if statement handeles 
+      // whether the element to turn red is in left or right, or the same as rightComponent.
       secondStepChangeCollorArray.push(rightComponent)
       
       if ( left[ leftLocation + rightLocation + 1 ] !== undefined ) {
@@ -478,26 +548,38 @@ function mergeArraysSteps(left, right, color){
         secondStepChangeCollorArray.push(rightComponent)
       }
 
-
+      // true will cause the heights and colors to be changed
       secondStep.push(true)
+      // Add all the arrays to secondStep
       secondStep.push(secondStepObjectArray)
       secondStep.push(secondStepHeightArray)
       secondStep.push(secondStepChangeCollorArray)
       secondStep.push(color)
 
-      
+      // The third Step will turn every element that has turned red back to color
+      // Every element for which this is the case is present in thirdStepChangeCollorArray
       thirdStep.push(thirdStepChangeCollorArray)
       thirdStep.push(color)
-      
+
+      // Add all the steps to colorArray
       stepArray.push(firstStep, secondStep, thirdStep)
+      // Consider in the next iteration the element to the right of rightComponent
       rightLocation++;
+
+
+    // If components do not need to switched arround, create a different set of steps,
+    // where the second step does not change anything in the visualisation
     } else {
 
       var firstStep = [0]
       var secondStep = [1]
       var thirdStep = [2]
       var thirdStepChangeCollorArray = []
-      
+
+      // Step 1. Turn 2 bars red. These bars will be compared and switched. These bars are located at
+      // some location of the leftHeights and the first position of the rightHeights array, which is equal
+      // to rightcomponent. Since leftHeights.length >= leftLength, the component can appear in right.
+      // The third case is for error handeling, and the last object of right will automatically selected.
       if ( left[ leftLocation + rightLocation ] !== undefined ) {
 
         firstStep.push( left[ leftLocation + rightLocation ] );
@@ -512,30 +594,38 @@ function mergeArraysSteps(left, right, color){
 
         firstStep.push( right[ right.length - 1 ] )
         thirdStepChangeCollorArray.push( right[ right.length - 1 ] )
-        
+
       }
 
+      // The right component to change color to red
       firstStep.push(rightComponent)
       thirdStepChangeCollorArray.push(rightComponent)
 
+
+      // Since no heights are changed, second step should not be done and is thus false.
       secondStep.push(false);
 
+      // The third Step will turn every element that has turned red back to color
+      // Every element for which this is the case is present in thirdStepChangeCollorArray
       thirdStep.push(thirdStepChangeCollorArray)
       thirdStep.push(color)
 
-
+      // Add all the steps to colorArray
       stepArray.push(firstStep, secondStep, thirdStep)
+      // Since leftComponent is smaller then every element in rightHeights, consider the next left element
       leftLocation++;
 
     }
   }
 
+  // Add a Final step, where every element of left and right get a given color, \
+  // and where the sorted array will be returned.
   stepArray.push([3, mergedArray, color])
 
   return stepArray;
 }
 
-
+// Devide the array in 2 parts, where left >= right
 function divideArray(arrayToSplit){
   lengthLeft = Math.ceil(arrayToSplit.length/2);
   leftArray = arrayToSplit.slice(0, lengthLeft);
@@ -544,14 +634,23 @@ function divideArray(arrayToSplit){
   return [leftArray, rightArray];
 }
 
-
-function colorArrayDivision(array, color){
-  if (array === undefined){
-    return true;
+// Generates a Random Color
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
   }
+  return color;
+}
+
+// colorArrayDivision either colors exactly 1 bar of array to color and return false, or return true
+// false indicates that it is very likely that not all bars have been turned to color
+// true indicates that every bar has color
+function colorArrayDivision(array, color){
 
   arrayLength = array.length;
-  for(var i = 0; i < array.length; i++){
+  for(var i = 0; i < arrayLength; i++){
     if (array[i].getColor() != color){
       array[i].changeColor(color);
       return false;
@@ -561,6 +660,10 @@ function colorArrayDivision(array, color){
 }
 
 
+// SelectionSort seeks the largest element of the part of the array which still needs to be sorted. When this element is found, 
+// the element is switched with the last element of the part of the array which still needs to be sorted, and this last element will
+// thus be sorted. This is repeated untill the array is sorted.
+// This algorithm is used when the costs of switching element is relatively high.
 function selectionSort(){
   if ((iterator - (barAmount - cycleNumberSelectionSort)*3) >= 0){
     cycleNumberSelectionSort++;
@@ -591,7 +694,9 @@ function selectionSort(){
     switchCaseValue = 1001;
   }
 
+  // The animation cycle
   switch(switchCaseValue){
+    // Turn the elements wich will be compared to red.
     case 0:
 
       intsToSortArray[currentBarSelectionSort].changeColor("red");
@@ -602,7 +707,7 @@ function selectionSort(){
     case 1:
 
       break;
-
+    // Select the largest element, and turn the element with a smaller height blue again.
     case 2:
       var heightCurrent = intsToSortArray[currentBarSelectionSort].getHeight();
       var heightHeigestValue = intsToSortArray[currentHeighestValueInArray].getHeight();
@@ -615,12 +720,15 @@ function selectionSort(){
       break;
     
     // These 3 cases animate the end of every cycle when the heighest value has been found
+    // Turn the elements wich will be switched to red, where 1 of the elements is the largest element
+    // of the part of the array which is not sorted 
     case 1003:
       intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("red");
       intsToSortArray[currentHeighestValueInArray].changeColor("red");
 
       break;
-
+    
+    // Switch the 2 elements.
     case 1002:
       
       var heightCurrent = intsToSortArray[barAmount - cycleNumberSelectionSort].getHeight();
@@ -629,15 +737,17 @@ function selectionSort(){
       intsToSortArray[currentHeighestValueInArray].changeHeight(heightCurrent);
       
       break;
-
+      
+    // Turn the elements blue again, and reset the var that keeps track of the heighest element.
     case 1001:
       intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("blue");
       intsToSortArray[currentHeighestValueInArray].changeColor("blue");
       currentHeighestValueInArray = 0;
 
   }
-
+  // increase iterator for the next loop.
   iterator++;
+  // Update the canvas, and thus the heights and colors.
   updateCanvas();
 }
 
