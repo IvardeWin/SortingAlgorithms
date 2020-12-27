@@ -7,7 +7,7 @@ var barSpace = 1;
 var minHeight = 10;
 
 var intsToSortArray = [];
-var delay = 150;
+var delay = 100;
 
 // Common variables used by multiple Sorting Algorithms
 var iterator = 0;
@@ -343,10 +343,11 @@ function mergeArraysColoring(stepArray){
     break;
 
     case 2:
-      currentStep[1].changeColor(currentStep[3])
-      currentStep[2].changeColor(currentStep[3])
+      for(var i = 0; i < currentStep[1].length; i++){
+        currentStep[1][i].changeColor(currentStep[2])
+      }
     break;
-
+    // Don't forget to make a function of the changing of colors. Code has been copied 3 times, Ivar
     case 3:
       for(var i = 0; i < currentStep[1].length; i++){
         currentStep[1][i].changeColor(currentStep[2])
@@ -402,16 +403,27 @@ function mergeArraysSteps(left, right, color){
       var secondStepHeightArray = []
       var secondStepChangeCollorArray = []
       var thirdStep = [2]
+      var thirdStepChangeCollorArray = []
 
-      if ( left[leftLocation+rightLocation] !== undefined){
-        firstStep.push(left[leftLocation + rightLocation]);
-      } else if (right[(leftLocation + rightLocation) - leftLength] !== undefined){
-        firstStep.push(right[(leftLocation + rightLocation) - leftLength])
+      if ( left[ leftLocation + rightLocation ] !== undefined ) {
+
+        firstStep.push( left[ leftLocation + rightLocation ] );
+        thirdStepChangeCollorArray.push( left[ leftLocation + rightLocation ] )
+
+      } else if ( right[ ( leftLocation + rightLocation )  - leftLength ] !== undefined ) {
+
+        firstStep.push( right[( leftLocation + rightLocation ) - leftLength ] )
+        thirdStepChangeCollorArray.push( right[ ( leftLocation + rightLocation ) - leftLength ] )
+
       } else {
-        firstStep.push(right[0])
+
+        firstStep.push( right[ right.length - 1 ] )
+        thirdStepChangeCollorArray.push( right[ right.length - 1 ] )
+
       }
-      
-      firstStep.push(rightComponent);
+
+      firstStep.push(rightComponent)
+      thirdStepChangeCollorArray.push(rightComponent)
       
       leftHeights.splice(leftLocation + rightLocation, 0, rightHeights[0])
       rightHeights.splice(0, 1)
@@ -426,22 +438,29 @@ function mergeArraysSteps(left, right, color){
             secondStepObjectArray.push(left[k])
             secondStepHeightArray.push(leftHeights[k])
 
+            thirdStepChangeCollorArray.push(left[k])
+
           } else if (leftHeights[k] !== undefined){
 
             secondStepObjectArray.push(right[k - leftLength])
             secondStepHeightArray.push(leftHeights[k])
 
+            thirdStepChangeCollorArray.push(right[k - leftLength])
+
           } else {
             secondStepObjectArray.push(right[k - leftLength])
             secondStepHeightArray.push(rightHeights[k - leftHeights.length])
+
+            thirdStepChangeCollorArray.push(right[k - leftLength])
 
           }
         }
 
       } else {
-        secondStepObjectArray.push(left[0]);
+
+        secondStepObjectArray.push(left[0])
         secondStepHeightArray.push(leftHeights[0])
-        secondStepObjectArray.push(right[0]);
+        secondStepObjectArray.push(right[0])
         secondStepHeightArray.push(leftHeights[1])
         secondStepChangeCollorArray.push(right[0])
 
@@ -449,47 +468,65 @@ function mergeArraysSteps(left, right, color){
 
       secondStepChangeCollorArray.push(rightComponent)
       
-      if (left[leftLocation] != undefined){
-        secondStepChangeCollorArray.push(left[leftLocation])
+      if ( left[ leftLocation + rightLocation + 1 ] !== undefined ) {
+        secondStepChangeCollorArray.push( left[ leftLocation + rightLocation + 1 ] )
+
+      } else if ( right[ (leftLocation + rightLocation) + 1  - leftLength ] !== undefined) {
+        secondStepChangeCollorArray.push( right[ (leftLocation + rightLocation) + 1 - leftLength ] )
+
       } else {
-        secondStepChangeCollorArray.push(right[leftLocation - leftLength])
+        secondStepChangeCollorArray.push(rightComponent)
       }
+
+
       secondStep.push(true)
       secondStep.push(secondStepObjectArray)
       secondStep.push(secondStepHeightArray)
       secondStep.push(secondStepChangeCollorArray)
       secondStep.push(color)
 
-      thirdStep.push(leftComponent)
-      thirdStep.push(rightComponent)
       
+      thirdStep.push(thirdStepChangeCollorArray)
       thirdStep.push(color)
       
       stepArray.push(firstStep, secondStep, thirdStep)
       rightLocation++;
     } else {
+
       var firstStep = [0]
       var secondStep = [1]
       var thirdStep = [2]
+      var thirdStepChangeCollorArray = []
       
-      if ( left[leftLocation+rightLocation] !== undefined){
-        firstStep.push(left[leftLocation + rightLocation]);
-      } else if (right[leftLength - (leftLocation + rightLocation)] !== undefined){
-        firstStep.push(right[leftLength - (leftLocation + rightLocation)])
+      if ( left[ leftLocation + rightLocation ] !== undefined ) {
+
+        firstStep.push( left[ leftLocation + rightLocation ] );
+        thirdStepChangeCollorArray.push( left[ leftLocation + rightLocation ] )
+
+      } else if ( right[ ( leftLocation + rightLocation )  - leftLength ] !== undefined ) {
+
+        firstStep.push( right[( leftLocation + rightLocation ) - leftLength ] )
+        thirdStepChangeCollorArray.push( right[ ( leftLocation + rightLocation ) - leftLength ] )
+
       } else {
-        firstStep.push(right[0])
+
+        firstStep.push( right[ right.length - 1 ] )
+        thirdStepChangeCollorArray.push( right[ right.length - 1 ] )
+        
       }
 
-      firstStep.push(rightComponent);
+      firstStep.push(rightComponent)
+      thirdStepChangeCollorArray.push(rightComponent)
 
       secondStep.push(false);
 
-      thirdStep.push(leftComponent)
-      thirdStep.push(rightComponent)
+      thirdStep.push(thirdStepChangeCollorArray)
       thirdStep.push(color)
+
 
       stepArray.push(firstStep, secondStep, thirdStep)
       leftLocation++;
+
     }
   }
 
