@@ -1,13 +1,13 @@
 const WIDTH = screen.width * 0.7;
 const HEIGHT = screen.height * 0.6;
 
-var barAmount = 500;
+var barAmount = 50;
 var barWidth = Math.floor(WIDTH / barAmount) - 1;
 var barSpace = 1;
 var minHeight = 10;
 
 var intsToSortArray = [];
-var delay = 0;
+var delay = 150;
 
 // Common variables used by multiple Sorting Algorithms
 var iterator = 0;
@@ -300,6 +300,8 @@ function mergeSort(){
 
     if (rightArray === undefined){
       rightArrayLength = -2;
+    } else if (rightArray.length == 1 && array.length == 1 && leftArray.length == 1){
+      rightArrayLength = -2;
     } else {
       rightArrayLength = rightArray.length;
     }
@@ -435,7 +437,6 @@ function mergeArraysSteps(left, right, color){
 
           }
         }
-        
 
       } else {
         secondStepObjectArray.push(left[0]);
