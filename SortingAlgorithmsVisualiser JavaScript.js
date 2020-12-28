@@ -59,6 +59,7 @@ function setUp() {
   updateCanvas();
 }
 
+// Function to change the delay, and thus the speed of the sorting algorithms.
 function changeDelay(value){
   if ( value < 1){
     newDelay = -1;
@@ -85,7 +86,10 @@ function changeDelay(value){
   }
 }
 
+
+// Function to change the amount of bars, based on a given bar width.
 function changeAmountOfBars(value){
+  value = Math.floor(value);
   value = Math.pow(value, 2);
   if (value <= barWidth){
     barWidth = value;
@@ -128,6 +132,30 @@ function changeAmountOfBars(value){
   }
   updateCanvas()
 }
+
+function resetIntArray(){
+  intervalToggleBubbleSort.stop()
+  intervalToggleInsertionSort.stop()
+  intervalToggleSelectionSort.stop()
+  intervalToggleMergeSort.stop()
+  
+  resetVariables()
+
+  intsToSortArray = []
+  createRandomIntArray()
+  updateCanvas()
+
+  if ( runningSortingAlgorithm == 0 ) {
+    intervalToggleBubbleSort.start()
+  } else if( runningSortingAlgorithm == 1 ) {
+    intervalToggleInsertionSort.start()
+  } else if ( runningSortingAlgorithm == 2 ) {
+    intervalToggleSelectionSort.start()
+  } else if ( runningSortingAlgorithm == 3 ) {
+    intervalToggleMergeSort.start()
+  }
+}
+
 
 // Toggle to call the BubbleSort function after every delay ms
 var intervalToggleBubbleSort = {
@@ -360,6 +388,7 @@ function mergeSort(){
   // When everything has the right colors and heights, check if the MergeSort algorithm is done
   if (mergeSortDevisionArray.length == 1 && mergeSortSortedArray[0] == true){
     intervalToggleMergeSort.stop()
+    runningSortingAlgorithm = -1
     return;
   }
 
@@ -760,6 +789,7 @@ function selectionSort(){
     // Stop when the sort is done
     if (cycleNumberSelectionSort >= barAmount){
       intervalToggleSelectionSort.stop();
+      runningSortingAlgorithm = -1;
       return;
     }
 
@@ -856,6 +886,7 @@ function bubbleSort(){
     // of elements in the array
     if (cycleNumberBubbleSort >= barAmount || alreadySorted){
       intervalToggleBubbleSort.stop();
+      runningSortingAlgorithm = -1;
       return;
     }
     // If alreadySorted turns false before the start of the next cycle, then not every 
@@ -904,6 +935,7 @@ function insertionSort(){
   // Stop the algorithm when the end of the array is reached.
   if (iterator >= (barAmount - 1) * 3){
     intervalToggleBubbleSort.stop();
+    runningSortingAlgorithm = -1;
     return;
   }
 
