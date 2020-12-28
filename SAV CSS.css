@@ -41,14 +41,14 @@ body {
 
   div.sliders {
     position:fixed;
-    top: 90%;
+    top: 88%;
     left: 42%;
     width: 16%;
   }
 
   div.slider1Text {
     position:fixed;
-    top: 91%;
+    top: 90%;
     left: 41%;
     width: 8%;
     text-align: center;
@@ -57,7 +57,7 @@ body {
 
   div.slider2Text {
     position:fixed;
-    top: 91%;
+    top: 90%;
     left: 49%;
     width: 8%;
     text-align: center;
