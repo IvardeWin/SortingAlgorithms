@@ -1,4 +1,4 @@
-const WIDTH = screen.width * 0.7;
+const WIDTH = screen.width * 0.8;
 const HEIGHT = screen.height * 0.6;
 
 
@@ -31,7 +31,7 @@ var cycleNumberSelectionSort = 0;
 // Variables MergeSort
 var mergeSortSortedArray = [false]
 var coloringDevideDoneArray = [true]
-var mergeSortColorArray = ["blue"]
+var mergeSortColorArray = ["#8083c9"]
 var mergeSortDevisionArray = []
 var mergeSortStepArray = []
 
@@ -39,7 +39,7 @@ var mergeSortStepArray = []
 
 // Return a random number between an min and max number.
 function randomNumber(maxHeight, minHeight){
-  return Math.floor(Math.random()*(maxHeight - minHeight))+minHeight;
+  return Math.floor(Math.random() * ( maxHeight - minHeight ) ) + minHeight;
 }
 
 // Creates an array with random integers between an min and a max.
@@ -48,7 +48,7 @@ function createRandomIntArray(){
   for(i = 0; i < barAmount; i++){
     var randomHeight = randomNumber(HEIGHT, minHeight);
     var position = i * (barWidth + barSpace);
-    intsToSortArray.push(new component(barWidth, randomHeight, "blue", position, HEIGHT));
+    intsToSortArray.push(new component(barWidth, randomHeight, "#8083c9", position, HEIGHT));
   }
 }
 
@@ -61,6 +61,7 @@ function setUp() {
 
 // Function to change the delay, and thus the speed of the sorting algorithms.
 function changeDelay(value){
+  value = 5.2 - value;
   if ( value < 1){
     newDelay = -1;
   } else {
@@ -89,9 +90,10 @@ function changeDelay(value){
 
 // Function to change the amount of bars, based on a given bar width.
 function changeAmountOfBars(value){
-  value = Math.floor(value);
   value = Math.pow(value, 2);
+  value = Math.floor(value);
   if (value <= barWidth){
+    stopIntervals()
     barWidth = value;
     var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
     var extraBars = newBarAmount - barAmount;
@@ -107,11 +109,12 @@ function changeAmountOfBars(value){
     for(var i = 0; i < extraBars; i++){
       var randomHeight = randomNumber(HEIGHT, minHeight);
       var position = (i + barAmount) * (barWidth + barSpace);
-      intsToSortArray.push(new component(barWidth, randomHeight, "blue", position, HEIGHT))
+      intsToSortArray.push(new component(barWidth, randomHeight, "#8083c9", position, HEIGHT))
     }
     barAmount = newBarAmount;
 
   } else if (value > barWidth){
+    stopIntervals()
     barWidth = value;
     var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
     var redundantBars = barAmount - newBarAmount;
@@ -135,10 +138,17 @@ function changeAmountOfBars(value){
 
 function resetIntArray(){
   intervalToggleBubbleSort.stop()
+  intervalToggleBubbleSort.clear()
+
   intervalToggleInsertionSort.stop()
+  intervalToggleInsertionSort.clear()
+
   intervalToggleSelectionSort.stop()
+  intervalToggleSelectionSort.clear()
+
   intervalToggleMergeSort.stop()
-  
+  intervalToggleMergeSort.clear()
+
   resetVariables()
 
   intsToSortArray = []
@@ -160,18 +170,31 @@ function resetIntArray(){
 // Toggle to call the BubbleSort function after every delay ms
 var intervalToggleBubbleSort = {
   start : function() {
-    // Stop all other functions
+    if (this.running === true){
+      intervalToggleBubbleSort.stop()
+      return
+    } else if (this.running === false){
+      intervalToggleBubbleSort.continue()
+      return;
+    }
     stopIntervals()
+    // Stop all other functions
     runningSortingAlgorithm = 0;
     // Start the interval
+    this.running = true;
     this.interval = setInterval(bubbleSort, delay);
   },
   continue : function() {
+    this.running = true;
     this.interval = setInterval(bubbleSort, delay);
   },
   stop : function(){
     // Stop the interval
     clearInterval(this.interval);
+    this.running = false;
+  }, 
+  clear : function(){
+    this.running = undefined;
   }
 
 }
@@ -180,18 +203,33 @@ var intervalToggleBubbleSort = {
 // Toggle to call the InsertionSort function after every delay ms
 var intervalToggleInsertionSort = {
   start : function() {
+
+    if (this.running === true){
+      intervalToggleInsertionSort.stop()
+      return
+    } else if (this.running === false){
+      intervalToggleInsertionSort.continue()
+      return;
+    }
+
     // Stop all other functions
     stopIntervals()
     runningSortingAlgorithm = 1
     // Start the interval
+    this.running = true
     this.interval = setInterval(insertionSort, delay);
   },
   continue : function() {
+    this.running = true
     this.interval = setInterval(insertionSort, delay);
   },
   stop : function(){
     // Stop the interval
     clearInterval(this.interval);
+    this.running = false
+  }, 
+  clear : function(){
+    this.running = undefined;
   }
 
 }
@@ -200,6 +238,15 @@ var intervalToggleInsertionSort = {
 // Toggle to call the InsertionSort function after every delay ms
 var intervalToggleSelectionSort = {
   start : function() {
+
+    if (this.running === true){
+      intervalToggleSelectionSort.stop()
+      return
+    } else if (this.running === false){
+      intervalToggleSelectionSort.continue()
+      return;
+    }
+
     // Stop all other functions
     stopIntervals();
     // The iterator needs to start at 3 for the first cycle of selectionSort
@@ -207,14 +254,20 @@ var intervalToggleSelectionSort = {
 
     runningSortingAlgorithm = 2;
     // Start the interval
+    this.running = true
     this.interval = setInterval(selectionSort, delay);
   },
   continue : function() {
+    this.running = true
     this.interval = setInterval(selectionSort, delay);
   },
   stop : function(){
     // Stop the interval
     clearInterval(this.interval);
+    this.running = false
+  }, 
+  clear : function(){
+    this.running = undefined;
   }
 
 }
@@ -222,6 +275,15 @@ var intervalToggleSelectionSort = {
 // Toggle to call the MergeSort function after every delay ms
 var intervalToggleMergeSort = {
   start : function() {
+
+    if (this.running === true){
+      intervalToggleMergeSort.stop()
+      return
+    } else if (this.running === false){
+      intervalToggleMergeSort.continue()
+      return;
+    }
+
     // Stop all other functions
     stopIntervals();
 
@@ -229,14 +291,20 @@ var intervalToggleMergeSort = {
 
     runningSortingAlgorithm = 3;
     // Start the interval
+    this.running = true
     this.interval = setInterval(mergeSort, delay);
   },
   continue : function() {
+    this.running = true
     this.interval = setInterval(mergeSort, delay);
   },
   stop : function(){
     // Stop the interval
     clearInterval(this.interval);
+    this.running = false
+  }, 
+  clear : function(){
+    this.running = undefined;
   }
 
 }
@@ -244,10 +312,18 @@ var intervalToggleMergeSort = {
 
 // Stops every interval of every Sorting Algorithm
 function stopIntervals(){
-  intervalToggleInsertionSort.stop();
   intervalToggleBubbleSort.stop();
+  intervalToggleBubbleSort.clear();
+  
+  intervalToggleInsertionSort.stop();
+  intervalToggleInsertionSort.clear();
+  
   intervalToggleSelectionSort.stop();
+  intervalToggleSelectionSort.clear();
+
   intervalToggleMergeSort.stop();
+  intervalToggleMergeSort.clear();
+
   resetAfterSuddenIntervalStop();
   runningSortingAlgorithm = undefined;
   // Reset the variables for when an interval, or Sorting algorithm, is restarted 
@@ -257,7 +333,7 @@ function stopIntervals(){
 
 function resetAfterSuddenIntervalStop(){
   for(i = 0; i < barAmount; i++){
-    intsToSortArray[i].changeColor("blue");
+    intsToSortArray[i].changeColor("#8083c9");
   }
   updateCanvas();
 }
@@ -279,7 +355,7 @@ function resetVariables(){
   // MergeSort variables
   mergeSortSortedArray = [false]
   coloringDevideDoneArray = [true]
-  mergeSortColorArray = ["blue"]
+  mergeSortColorArray = ["#8083c9"]
   mergeSortDevisionArray = []
   mergeSortStepArray = []
 }
@@ -291,6 +367,9 @@ var canvasCreate = {
   start : function() {
       this.canvas.width = WIDTH;
       this.canvas.height = HEIGHT;
+      this.canvas.style.position = "absolute";
+      this.canvas.style.top = "20%";
+      this.canvas.style.left = "10%";
       this.context = this.canvas.getContext("2d");
       document.body.insertBefore(this.canvas, document.body.childNodes[0]);
       },
@@ -387,7 +466,7 @@ function mergeSort(){
 
   // When everything has the right colors and heights, check if the MergeSort algorithm is done
   if (mergeSortDevisionArray.length == 1 && mergeSortSortedArray[0] == true){
-    intervalToggleMergeSort.stop()
+    stopIntervals()
     runningSortingAlgorithm = -1
     return;
   }
@@ -469,8 +548,8 @@ function mergeArraysColoring(stepArray){
   switch(currentStep[0]){
     // Color the bars that will be compared/moved red.
     case 0:
-      currentStep[1].changeColor("red")
-      currentStep[2].changeColor("red")
+      currentStep[1].changeColor("#FF3A3A")
+      currentStep[2].changeColor("#FF3A3A")
     break;
 
     // If bars need to be moved, change the height of every bar so every bar has the right height.
@@ -484,7 +563,7 @@ function mergeArraysColoring(stepArray){
         }
         // color 2 bars differently so it will look like the red bars has been moved.
         currentStep[4][0].changeColor(currentStep[5])
-        currentStep[4][1].changeColor("red")
+        currentStep[4][1].changeColor("#FF3A3A")
       }
     break;
 
@@ -713,7 +792,6 @@ function mergeArraysSteps(left, right, color){
 
       // The right component to change color to red
       firstStep.push(rightComponent)
-      thirdStepChangeCollorArray.push(rightComponent)
 
 
       // Since no heights are changed, second step should not be done and is thus false.
@@ -750,16 +828,13 @@ function divideArray(arrayToSplit){
 
 // Generates a Random Color
 function getRandomColor() {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
-  // The first 2 letters corrospong to red. Red colors are unfavourable, hence, red should not get
-  // high values.
-  for (var i = 0; i < 2; i++) {
-    color += letters[Math.floor(Math.random() * 10)];
-  }
-  for (var i = 0; i < 4; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
+
+  var randomColorArray = ["#ff72b5", "#33e9fa", "#cb36ff",
+	"#33b5ff", "#22fd9f", "#5480a0",	"#ffdcf2", "#33ffa4", 	"#33a8cf", "#e8d833",
+	"#5c4cdc", "#f6229f", "#b424b8",	"#33dce9", "#f16f2b", 	"#ffafd5", "50dddd",
+  "#33cdff", 	"#33b2a8", 	"#e1e633", 	"#a4ff8c", "#23ffcc", "#efa39b", "#f069c0"]
+  color = randomColorArray[randomNumber(randomColorArray.length, 0)]
+
   return color;
 }
 
@@ -788,8 +863,8 @@ function selectionSort(){
 
     // Stop when the sort is done
     if (cycleNumberSelectionSort >= barAmount){
-      intervalToggleSelectionSort.stop();
-      runningSortingAlgorithm = -1;
+      stopIntervals()
+      runningSortingAlgorithm = -1
       return;
     }
 
@@ -818,8 +893,8 @@ function selectionSort(){
     // Turn the elements wich will be compared to red.
     case 0:
 
-      intsToSortArray[currentBarSelectionSort].changeColor("red");
-      intsToSortArray[currentHeighestValueInArray].changeColor("red");
+      intsToSortArray[currentBarSelectionSort].changeColor("#FF3A3A");
+      intsToSortArray[currentHeighestValueInArray].changeColor("#FF3A3A");
 
       break;
     // Empty case to create a smoother animation
@@ -831,10 +906,10 @@ function selectionSort(){
       var heightCurrent = intsToSortArray[currentBarSelectionSort].getHeight();
       var heightHeigestValue = intsToSortArray[currentHeighestValueInArray].getHeight();
       if (heightCurrent >= heightHeigestValue){
-        intsToSortArray[currentHeighestValueInArray].changeColor("blue");
+        intsToSortArray[currentHeighestValueInArray].changeColor("#8083c9");
         currentHeighestValueInArray = currentBarSelectionSort;
       } else {
-        intsToSortArray[currentBarSelectionSort].changeColor("blue");
+        intsToSortArray[currentBarSelectionSort].changeColor("#8083c9");
       }
       break;
     
@@ -842,8 +917,8 @@ function selectionSort(){
     // Turn the elements wich will be switched to red, where 1 of the elements is the largest element
     // of the part of the array which is not sorted 
     case 1003:
-      intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("red");
-      intsToSortArray[currentHeighestValueInArray].changeColor("red");
+      intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("#FF3A3A");
+      intsToSortArray[currentHeighestValueInArray].changeColor("#FF3A3A");
 
       break;
     
@@ -859,8 +934,8 @@ function selectionSort(){
       
     // Turn the elements blue again, and reset the var that keeps track of the heighest element.
     case 1001:
-      intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("blue");
-      intsToSortArray[currentHeighestValueInArray].changeColor("blue");
+      intsToSortArray[barAmount - cycleNumberSelectionSort].changeColor("#8083c9");
+      intsToSortArray[currentHeighestValueInArray].changeColor("#8083c9");
       currentHeighestValueInArray = 0;
 
   }
@@ -885,8 +960,8 @@ function bubbleSort(){
     // elements that are certainly sorted is equal or greater than the amount
     // of elements in the array
     if (cycleNumberBubbleSort >= barAmount || alreadySorted){
-      intervalToggleBubbleSort.stop();
-      runningSortingAlgorithm = -1;
+      stopIntervals()
+      runningSortingAlgorithm = -1
       return;
     }
     // If alreadySorted turns false before the start of the next cycle, then not every 
@@ -903,8 +978,8 @@ function bubbleSort(){
   switch(iterator - (currentBarBubbleSort * 3)){
     // Turn the bars that will be compared red.
     case 0:
-      intsToSortArray[currentBarBubbleSort].changeColor("red");
-    	intsToSortArray[currentBarBubbleSort + 1].changeColor("red");
+      intsToSortArray[currentBarBubbleSort].changeColor("#FF3A3A");
+    	intsToSortArray[currentBarBubbleSort + 1].changeColor("#FF3A3A");
       break;
     // Compare and maybe switch the bars.
     case 1:
@@ -919,8 +994,8 @@ function bubbleSort(){
       break;
     // Turn the bars blue again
     case 2:
-      intsToSortArray[currentBarBubbleSort].changeColor("blue");
-    	intsToSortArray[currentBarBubbleSort + 1].changeColor("blue");
+      intsToSortArray[currentBarBubbleSort].changeColor("#8083c9");
+    	intsToSortArray[currentBarBubbleSort + 1].changeColor("#8083c9");
 
       break;
 
@@ -934,8 +1009,8 @@ function bubbleSort(){
 function insertionSort(){
   // Stop the algorithm when the end of the array is reached.
   if (iterator >= (barAmount - 1) * 3){
-    intervalToggleBubbleSort.stop();
-    runningSortingAlgorithm = -1;
+    stopIntervals()
+    runningSortingAlgorithm = -1
     return;
   }
 
@@ -952,8 +1027,8 @@ function insertionSort(){
   switch(iterator - (currentBarInsertionSort * 3)){
     case 0:
       // Change the colors of the elements that will be compared to red.
-      intsToSortArray[currentBarInsertionSort].changeColor("red");
-    	intsToSortArray[currentBarInsertionSort + 1].changeColor("red");
+      intsToSortArray[currentBarInsertionSort].changeColor("#FF3A3A");
+    	intsToSortArray[currentBarInsertionSort + 1].changeColor("#FF3A3A");
       break;
 
     case 1:
@@ -985,11 +1060,11 @@ function insertionSort(){
     case 2:
       if (switched){
         // Make sure the switched bars get turned to blue again
-        intsToSortArray[currentBarInsertionSort + 2].changeColor("blue");
-        intsToSortArray[currentBarInsertionSort + 2 + 1] .changeColor("blue");
+        intsToSortArray[currentBarInsertionSort + 2].changeColor("#8083c9");
+        intsToSortArray[currentBarInsertionSort + 2 + 1] .changeColor("#8083c9");
       } else {
-        intsToSortArray[currentBarInsertionSort].changeColor("blue");
-        intsToSortArray[currentBarInsertionSort + 1].changeColor("blue");
+        intsToSortArray[currentBarInsertionSort].changeColor("#8083c9");
+        intsToSortArray[currentBarInsertionSort + 1].changeColor("#8083c9");
         // Send the iterator to the start of the main array.
         // -1 for the addtion to iterator at the end of the function.
         iterator = locationStartMainArray * 3 - 1 ;
