@@ -61,6 +61,7 @@ function setUp() {
 
 // Function to change the delay, and thus the speed of the sorting algorithms.
 function changeDelay(value){
+  // Inverst slider values. Higher values on slider means lower delay
   value = 5.2 - value;
   if ( value < 1){
     newDelay = -1;
@@ -68,14 +69,12 @@ function changeDelay(value){
     newDelay = Math.pow(value, 4);
   }
   
-  
-  intervalToggleBubbleSort.stop()
-  intervalToggleInsertionSort.stop()
-  intervalToggleSelectionSort.stop()
-  intervalToggleMergeSort.stop()
+  // Stop all intervals to change delay
+  stopAndClearIntervals()
 
   delay = newDelay;
 
+  // Continue any algorithm that was running when the delay slider was touched.
   if ( runningSortingAlgorithm == 0 ) {
     intervalToggleBubbleSort.continue()
   } else if( runningSortingAlgorithm == 1 ) {
@@ -90,14 +89,17 @@ function changeDelay(value){
 
 // Function to change the amount of bars, based on a given bar width.
 function changeAmountOfBars(value){
+  // Scale value to make a smoother slider
   value = Math.pow(value, 2);
   value = Math.floor(value);
+  // Add or remove bars
   if (value <= barWidth){
     stopIntervals()
     barWidth = value;
     var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
     var extraBars = newBarAmount - barAmount;
     var updateWidth = intsToSortArray.length
+    // Update width and location of existing bars
     for (var i = 0; i < updateWidth; i++){
       intsToSortArray[i].changeWidth(barWidth)
 
@@ -105,7 +107,7 @@ function changeAmountOfBars(value){
       intsToSortArray[i].changePosition(position);
 
     }
-    
+    // Add the new bars
     for(var i = 0; i < extraBars; i++){
       var randomHeight = randomNumber(HEIGHT, minHeight);
       var position = (i + barAmount) * (barWidth + barSpace);
@@ -118,12 +120,13 @@ function changeAmountOfBars(value){
     barWidth = value;
     var newBarAmount = Math.floor(WIDTH/(barWidth + barSpace))
     var redundantBars = barAmount - newBarAmount;
+    // remove the unneeded bars
     for(var i = 0; i < redundantBars; i++){
       intsToSortArray.pop();
     }
 
     var arrayLength = intsToSortArray.length;
-
+    // Update width and position of existing bars
     for(var i = 0; i < arrayLength; i++ ){
       intsToSortArray[i].changeWidth(barWidth)
       
@@ -137,6 +140,32 @@ function changeAmountOfBars(value){
 }
 
 function resetIntArray(){
+
+  stopAndClearIntervals()
+
+  resetVariables()
+
+  // Clear the array by reassigning a new empty array
+  intsToSortArray = []
+
+  createRandomIntArray()
+  updateCanvas()
+
+  // Restart the last running algorithm if there was an algorithm running
+  if ( runningSortingAlgorithm == 0 ) {
+    intervalToggleBubbleSort.start()
+  } else if( runningSortingAlgorithm == 1 ) {
+    intervalToggleInsertionSort.start()
+  } else if ( runningSortingAlgorithm == 2 ) {
+    intervalToggleSelectionSort.start()
+  } else if ( runningSortingAlgorithm == 3 ) {
+    intervalToggleMergeSort.start()
+  }
+}
+
+// Stop and clear the intervals
+// Used when visualiser switched from algorithm
+function stopAndClearIntervals(){
   intervalToggleBubbleSort.stop()
   intervalToggleBubbleSort.clear()
 
@@ -148,22 +177,6 @@ function resetIntArray(){
 
   intervalToggleMergeSort.stop()
   intervalToggleMergeSort.clear()
-
-  resetVariables()
-
-  intsToSortArray = []
-  createRandomIntArray()
-  updateCanvas()
-
-  if ( runningSortingAlgorithm == 0 ) {
-    intervalToggleBubbleSort.start()
-  } else if( runningSortingAlgorithm == 1 ) {
-    intervalToggleInsertionSort.start()
-  } else if ( runningSortingAlgorithm == 2 ) {
-    intervalToggleSelectionSort.start()
-  } else if ( runningSortingAlgorithm == 3 ) {
-    intervalToggleMergeSort.start()
-  }
 }
 
 
@@ -177,8 +190,10 @@ var intervalToggleBubbleSort = {
       intervalToggleBubbleSort.continue()
       return;
     }
-    stopIntervals()
+    
     // Stop all other functions
+    stopIntervals()
+
     runningSortingAlgorithm = 0;
     // Start the interval
     this.running = true;
@@ -189,7 +204,6 @@ var intervalToggleBubbleSort = {
     this.interval = setInterval(bubbleSort, delay);
   },
   stop : function(){
-    // Stop the interval
     clearInterval(this.interval);
     this.running = false;
   }, 
@@ -214,6 +228,7 @@ var intervalToggleInsertionSort = {
 
     // Stop all other functions
     stopIntervals()
+
     runningSortingAlgorithm = 1
     // Start the interval
     this.running = true
@@ -224,7 +239,6 @@ var intervalToggleInsertionSort = {
     this.interval = setInterval(insertionSort, delay);
   },
   stop : function(){
-    // Stop the interval
     clearInterval(this.interval);
     this.running = false
   }, 
@@ -243,6 +257,7 @@ var intervalToggleSelectionSort = {
       intervalToggleSelectionSort.stop()
       return
     } else if (this.running === false){
+      console.log("test")
       intervalToggleSelectionSort.continue()
       return;
     }
@@ -275,7 +290,6 @@ var intervalToggleSelectionSort = {
 // Toggle to call the MergeSort function after every delay ms
 var intervalToggleMergeSort = {
   start : function() {
-
     if (this.running === true){
       intervalToggleMergeSort.stop()
       return
@@ -283,6 +297,7 @@ var intervalToggleMergeSort = {
       intervalToggleMergeSort.continue()
       return;
     }
+    console.log("test");
 
     // Stop all other functions
     stopIntervals();
@@ -312,25 +327,16 @@ var intervalToggleMergeSort = {
 
 // Stops every interval of every Sorting Algorithm
 function stopIntervals(){
-  intervalToggleBubbleSort.stop();
-  intervalToggleBubbleSort.clear();
-  
-  intervalToggleInsertionSort.stop();
-  intervalToggleInsertionSort.clear();
-  
-  intervalToggleSelectionSort.stop();
-  intervalToggleSelectionSort.clear();
-
-  intervalToggleMergeSort.stop();
-  intervalToggleMergeSort.clear();
+  stopAndClearIntervals()
 
   resetAfterSuddenIntervalStop();
-  runningSortingAlgorithm = undefined;
+  runningSortingAlgorithm = -1;
   // Reset the variables for when an interval, or Sorting algorithm, is restarted 
   resetVariables();
 }
 
 
+// Reset the colors of the array when an algortihm is suddenly stopped
 function resetAfterSuddenIntervalStop(){
   for(i = 0; i < barAmount; i++){
     intsToSortArray[i].changeColor("#8083c9");
@@ -399,6 +405,7 @@ function component(width, height, color, x, y){
   this.color = color;
   this.x = x;
   this.y = y;
+  // Canvas component needed to draw on the canvas
   this.ctx = canvasCreate.context;
   this.changeHeight = function(height){
       this.height = height;
@@ -443,7 +450,6 @@ function mergeSort(){
       // Empty the animation steps array
       mergeSortStepArray = []
     }
-    // update the canvas with the new heights and colors
     updateCanvas()
     // Do not do anything else than the coloring
     return
@@ -458,7 +464,6 @@ function mergeSort(){
       // false so that the coloring will continue the next time mergeSort is called
       coloringDevideDoneArray[i] = colorArrayDivision(mergeSortDevisionArray[i], mergeSortColorArray[i])
     }
-    // update the canvas with the new colors
     updateCanvas()
     // Do not do anything else than the coloring
     return
@@ -828,13 +833,14 @@ function divideArray(arrayToSplit){
 
 // Generates a Random Color
 function getRandomColor() {
-
-  var randomColorArray = ["#ff72b5", "#33e9fa", "#cb36ff",
-	"#33b5ff", "#22fd9f", "#5480a0",	"#ffdcf2", "#33ffa4", 	"#33a8cf", "#e8d833",
-	"#5c4cdc", "#f6229f", "#b424b8",	"#33dce9", "#f16f2b", 	"#ffafd5", "50dddd",
-  "#33cdff", 	"#33b2a8", 	"#e1e633", 	"#a4ff8c", "#23ffcc", "#efa39b", "#f069c0"]
-  color = randomColorArray[randomNumber(randomColorArray.length, 0)]
-
+	var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 2; i++) {
+    color += letters[Math.floor(Math.random() * 8) + 5];
+ }
+  for (var i = 0; i < 4; i++) {
+     color += letters[Math.floor(Math.random() * 9) + 5];
+  }
   return color;
 }
 
