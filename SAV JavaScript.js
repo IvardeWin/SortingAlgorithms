@@ -90,7 +90,7 @@ function changeDelay(value){
 // Function to change the amount of bars, based on a given bar width.
 function changeAmountOfBars(value){
   // Scale value to make a smoother slider
-  value = Math.pow(value, 2);
+  value = Math.pow(value, 3);
   value = Math.floor(value);
   // Add or remove bars
   if (value <= barWidth){
@@ -374,7 +374,7 @@ var canvasCreate = {
       this.canvas.width = WIDTH;
       this.canvas.height = HEIGHT;
       this.canvas.style.position = "absolute";
-      this.canvas.style.top = "20%";
+      this.canvas.style.top = "15%";
       this.canvas.style.left = "10%";
       this.context = this.canvas.getContext("2d");
       document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -497,7 +497,11 @@ function mergeSort(){
 
     // Get a new Color for the coloring of the arrays
     mergeSortColorArray.splice(iterator, 0, getRandomColor());
-    return;
+
+    // 1 Recursive call so that the coloring will start immediatly
+    mergeSort()
+
+    return
 
 
   // If array can't be split, see if it can be combined with the array to the left of it
@@ -526,21 +530,21 @@ function mergeSort(){
     if((leftArray.length == array.length || array.length + 1) && array.length != rightArrayLength 
     && array.length != (rightArrayLength + 1)){
       // Remove one of the colors of the arrays. 
-      mergeSortColorArray.splice(iterator, 1);
+      mergeSortColorArray.splice(iterator, 1)
       // Decrement iterator. Every operation will now be relative to the left array.
-      iterator--;
+      iterator--
       // Get the Array of steps needed for the visualisation of the mergeSort algorithm
-      mergeSortStepArray = mergeArraysSteps(leftArray, array, mergeSortColorArray[iterator]);
+      mergeSortStepArray = mergeArraysSteps(leftArray, array, mergeSortColorArray[iterator])
       // Edit length of coloringDevideDoneArray such that it is the same length as MergeSortDevisionArray
-      coloringDevideDoneArray.splice(iterator, 1);
+      coloringDevideDoneArray.splice(iterator, 1)
       // The merged array is sorted, and 2 arrays have have been removed from MergeSortDevisionArray
       mergeSortSortedArray.splice(iterator, 2, true)
-      return;
+      return
     } 
 
   }
   // If the arrays could not be devided or merged, then consider the next array the next time MergeSort is called
-  iterator++;
+  iterator++
 
 }
 
@@ -643,15 +647,12 @@ function mergeArraysSteps(left, right, color){
     var leftComponent = left[leftLocation]
     var rightComponent  = right[rightLocation]
 
-    // heck if the basic information means that the array needs to be stopped.
-    if (leftComponent === undefined && (leftLocation - left.length) < rightLocation){
+    // correct information if needed
+    if (leftComponent === undefined && ((leftLocation - leftLength) < rightLocation)){
       leftComponent = right[leftLocation - left.length]
     }
    
-    if (leftComponent === undefined){
-      break;
-
-    } else if (rightComponent === undefined || rightHeights[0] === undefined){
+    if ( leftComponent === undefined || rightComponent === undefined || rightHeights[0] === undefined ){
       break;
 
     // If components need to switched arround, create a set of steps.

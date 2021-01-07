@@ -6,23 +6,23 @@
 	<title>Hello World</title>  
 </head> 
 <body onload="setUp()"> 
-    <div class = "header">
-        <div class = "Title"><p>Sorting Algorithms</p></div>
-    </div>
+    <div class = "header"></div>
+    <div class = "footer"></div>
+    <div class = "Title"><p>Sorting Algorithms</p></div>
     <div class="canvas">
     <canvas id="canvas">
         Your browser does not support the HTML5 canvas tag.</canvas>
     </div>
     <div class = "Buttons">
-    <button onclick="intervalToggleBubbleSort.start()">BubbleSort</button>
-    <button onclick="intervalToggleInsertionSort.start()">InsertionSort</button>
-    <button onclick="intervalToggleSelectionSort.start()">SelectionSort</button>
-    <button onclick="intervalToggleMergeSort.start()">MergeSort</button>
-    <button onclick="resetIntArray()">Reset the Array</button>
+    <button class = buttonDefault onclick="intervalToggleBubbleSort.start()">BubbleSort</button>
+    <button class = buttonDefault onclick="intervalToggleInsertionSort.start()">InsertionSort</button>
+    <button class = buttonDefault onclick="intervalToggleSelectionSort.start()">SelectionSort</button>
+    <button class = buttonDefault onclick="intervalToggleMergeSort.start()">MergeSort</button>
+    <button class = buttonDefault onclick="resetIntArray()">Reset the Array</button>
     </div>
     <div class = "sliders">
-        <input type="range" min="1" max="10" value="5" id="sliderBarWidth" oninput="changeAmountOfBars(this.value)" step="0.1">
-        <input type="range" min="0.9" max="4.3" value="2.2" id="sliderDelay" oninput="changeDelay(this.value)" step="0.1">
+        <input type="range" class = sliderDefault min="1" max="6.61" value="3" id="sliderBarWidth" oninput="changeAmountOfBars(this.value)" step="0.001">
+        <input type="range" class = sliderDefault min="0.9" max="4.3" value="2.2" id="sliderDelay" oninput="changeDelay(this.value)" step="0.01">
     </div>
     <div class = "slider1Text">
         <p>Bar Width</p> 
